@@ -1,0 +1,19 @@
+﻿<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Standard EXE</Name>
+    <Description>A project for creating a standard Visual Basic 6 application (.exe)</Description>
+    <Icon>__TemplateIcon.ico</Icon>
+    <ProjectType>VisualBasic6</ProjectType>
+    <SortOrder>50</SortOrder>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>Project</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+<!--    <RequiredFrameworkVersion>4.0</RequiredFrameworkVersion>-->
+  </TemplateData>
+  <TemplateContent>
+    <Project File="Project.vbpx" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Form1.frm</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

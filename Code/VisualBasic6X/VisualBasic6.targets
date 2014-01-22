@@ -1,0 +1,389 @@
+<!--
+***********************************************************************************************
+VisualBasic6.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process specific for VB6 projects.
+For example, it contains the step that actually calls the VB6 compiler.  The remainder
+of the build process is defined in Microsoft.Common.targets, which is imported by
+this file.
+
+Based on Microsoft.VisualBasic.targets, Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="Mt" AssemblyName="Microsoft.Build.CPPTasks.Common.v110, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+
+  <PropertyGroup>
+    <ImportByWildcardBeforeMicrosoftVisualBasicTargets Condition="'$(ImportByWildcardBeforeMicrosoftVisualBasicTargets)' == ''">true</ImportByWildcardBeforeMicrosoftVisualBasicTargets>
+    <ImportByWildcardAfterMicrosoftVisualBasicTargets Condition="'$(ImportByWildcardAfterMicrosoftVisualBasicTargets)' == ''">true</ImportByWildcardAfterMicrosoftVisualBasicTargets>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\$(MSBuildThisFile)\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\$(MSBuildThisFile)\ImportBefore')"/>
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <DefaultLanguageSourceExtension>.bas</DefaultLanguageSourceExtension>
+    <Language>VB6</Language>
+  </PropertyGroup>
+
+  <!-- Determine the path to VB6 -->
+  <PropertyGroup>
+    <VB6Path Condition="'$(VB6Path)' == ''">$(ProgramFiles)\Microsoft Visual Studio\VB98\VB6.EXE</VB6Path>
+  </PropertyGroup>
+
+  <UsingTask TaskName="MergeComReferences" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <ComReferences ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <ResolvedModules ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <MergedItems  ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+var results = new List<ITaskItem>();
+
+Log.LogMessage("ComReferences: {0}", ComReferences.Length);
+Log.LogMessage("ResolvedModules: {0}", ResolvedModules.Length);
+
+foreach(var reference in ComReferences)
+{
+  var referenceName = reference.GetMetadata("Identity");
+
+  //Log.LogMessage("Reference: {0}", referenceName);
+  if(reference.GetMetadata("Managed") == "True")
+  {
+      Log.LogMessage("Resolved module named '{0}' to '{1}'", referenceName, reference.GetMetadata("ResolvedPath"));
+      var item = new TaskItem(reference.GetMetadata("ResolvedPath"));
+      item.SetMetadata("Guid", reference.GetMetadata("Guid"));
+      item.SetMetadata("VersionMajor", Convert.ToInt32(reference.GetMetadata("VersionMajor")).ToString("X"));
+      item.SetMetadata("VersionMinor", Convert.ToInt32(reference.GetMetadata("VersionMinor")).ToString("X"));
+      item.SetMetadata("Name", referenceName);
+      item.SetMetadata("WrapperTool", reference.GetMetadata("WrapperTool"));
+      item.SetMetadata("AdditionalModules", reference.GetMetadata("AdditionalModules"));
+      item.SetMetadata("Managed", reference.GetMetadata("Managed"));
+      results.Add(item);
+  }
+   else
+  {
+  foreach(var module in ResolvedModules)
+  {
+    var name = module.GetMetadata("Name");
+    //Log.LogMessage("Module: {0}", name);
+
+    if( name.Equals(referenceName, StringComparison.OrdinalIgnoreCase) )
+    {
+      Log.LogMessage("Resolved module named '{0}' to '{1}'", referenceName, module.GetMetadata("FullPath"));
+      var item = new TaskItem(module.GetMetadata("FullPath"));
+      item.SetMetadata("Guid", reference.GetMetadata("Guid"));
+      item.SetMetadata("VersionMajor", Convert.ToInt32(reference.GetMetadata("VersionMajor")).ToString("X"));
+      item.SetMetadata("VersionMinor", Convert.ToInt32(reference.GetMetadata("VersionMinor")).ToString("X"));
+      item.SetMetadata("Name", name);
+      item.SetMetadata("WrapperTool", reference.GetMetadata("WrapperTool"));
+      item.SetMetadata("AdditionalModules", reference.GetMetadata("AdditionalModules"));
+        if (reference.GetMetadata("UseAsReferenceFlag") == "True")
+        {
+        item.SetMetadata("UseAsReferenceFlag", reference.GetMetadata("UseAsReferenceFlag"));
+        }
+        else 
+        {
+        item.SetMetadata("UseAsReferenceFlag", "False");
+        }
+      results.Add(item);
+    }
+  }
+}
+}
+
+MergedItems = results.ToArray();
+
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <PropertyGroup>
+    <FinalDefineConstants>CONFIG=&quot;$(Configuration)&quot;</FinalDefineConstants>
+    <FinalDefineConstants Condition=" '$(DefineDebug)' == 'true' ">$(FinalDefineConstants),DEBUG=-1</FinalDefineConstants>
+    <FinalDefineConstants Condition=" '$(DefineTrace)' == 'true' ">$(FinalDefineConstants),TRACE=-1</FinalDefineConstants>
+    <FinalDefineConstants Condition=" '$(MyType)' != '' ">$(FinalDefineConstants),_MyType=&quot;$(MyType)&quot;</FinalDefineConstants>
+    <FinalDefineConstants Condition=" '$(Platform)' != '' ">$(FinalDefineConstants),PLATFORM=&quot;$(Platform)&quot;</FinalDefineConstants>
+    <FinalDefineConstants Condition=" '$(Platform)' == '' ">$(FinalDefineConstants),PLATFORM=&quot;AnyCPU&quot;</FinalDefineConstants>
+    <FinalDefineConstants Condition=" '$(DefineConstants)' != '' ">$(FinalDefineConstants),$(DefineConstants)</FinalDefineConstants>
+
+    <!-- Provide a facility to override UseHostCompilerIfAvailable-->
+    <!--UseHostCompilerIfAvailable Condition=" '$(UseHostCompilerIfAvailable)' == ''">true</UseHostCompilerIfAvailable-->
+    <UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <DocFileItem Include="$(IntermediateOutputPath)$(DocumentationFile)"  Condition="'$(DocumentationFile)'!=''"/>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CoreCompileDependsOn>_ComputeNonExistentFileProperty</CoreCompileDependsOn>
+  </PropertyGroup>
+
+    <Target Name="CreateManifestResourceNames"
+            Condition="'@(EmbeddedResource)' != ''"
+            DependsOnTargets="$(CreateManifestResourceNamesDependsOn)"
+            >
+    </Target>
+
+  <Target Name="VB6ResolveComReferencePaths" BeforeTargets="CoreCompile">
+    <!-- Resolve the COM References so we can give the filenames to VB6 -->
+    <ItemGroup>
+      <VB6COMReference Include="@(COMReference)">
+        <Isolated>true</Isolated>
+      </VB6COMReference>
+    </ItemGroup>
+
+    <ResolveComReference
+          TypeLibNames="@(VB6COMReference)"
+          ResolvedAssemblyReferences="@(ReferencePath)"
+          WrapperOutputDirectory="$(InteropOutputPath)"
+          IncludeVersionInInteropName="$(IncludeVersionInInteropName)"
+          KeyContainer="$(KeyContainerName)"
+          KeyFile="$(KeyOriginatorFile)"
+          DelaySign="$(DelaySign)"
+          StateFile="@(_ResolveComReferenceCache)"
+          TargetFrameworkVersion="$(TargetFrameworkVersion)"
+          TargetProcessorArchitecture="$(ProcessorArchitecture)"
+          NoClassMembers="$(ComReferenceNoClassMembers)"
+          EnvironmentVariables="$(ResolveComReferenceEnvironment)"
+          SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
+          ExecuteAsTool="$(ComReferenceExecuteAsTool)">
+      <Output TaskParameter="ResolvedFiles" ItemName="VB6ResolvedFiles"/>
+      <Output TaskParameter="ResolvedModules" ItemName="VB6ResolvedModules"/>
+    </ResolveComReference>
+
+    <Message Text="Resolved Files: @(VB6ResolvedFiles)"/>
+    <Message Text="Resolved Modules: @(VB6ResolvedModules)"/>
+  </Target>
+
+  <Target Name="CoreCompile"
+      Inputs="$(MSBuildAllProjects);
+                @(Compile);
+                @(_CoreCompileResourceInputs);
+                $(ApplicationIcon);
+                $(AssemblyOriginatorKeyFile);
+                @(ReferencePath);
+                @(CompiledLicenseFile);
+                @(EmbeddedDocumentation);
+                $(Win32Resource);
+                $(Win32Manifest);
+                @(CustomAdditionalCompileInputs)"
+      Outputs="@(DocFileItem);
+                 @(IntermediateAssembly);
+                 @(_DebugSymbolsIntermediatePath);
+                 $(NonExistentFile);
+                 @(CustomAdditionalCompileOutputs)"
+      Returns=""
+      DependsOnTargets="$(CoreCompileDependsOn)"
+    >
+
+    <Message Text="UseHostCompilerIfAvailable=$(UseHostCompilerIfAvailable)"/>
+
+    <PropertyGroup>
+      <_NoWarnings Condition=" '$(WarningLevel)' == '0' ">true</_NoWarnings>
+      <_NoWarnings Condition=" '$(WarningLevel)' == '1' ">false</_NoWarnings>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <!-- If we are building in visual studio setting the VbcToolPath will prevent the inproc compiler from being used during compile-->
+      <VbcToolPath Condition="'$(VbcToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildToolsPath)</VbcToolPath>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetingClr2Framework)'=='true'">
+      <ReferencePath>
+        <EmbedInteropTypes/>
+      </ReferencePath>
+    </ItemGroup>
+
+    <!-- Remove the generated assembly info -->
+    <ItemGroup>
+      <Compile Remove="$(TargetFrameworkMonikerAssemblyAttributesPath)" Condition="'$(TargetFrameworkMonikerAssemblyAttributesPath)' != ''" />
+    </ItemGroup>
+
+    <Message Text="OutputType=$(OutputType)"/>
+    <Message Text="TargetType=$(TargetType)"/>
+
+<!--    <Error Condition="'$(OutputType)'=='exe'" Text="VB6 Projects can't build console applications. Change the application output type from '$(OutputType)'."/>-->
+
+    <PropertyGroup>
+      <VB6OutputType Condition="'$(VB6OutputType)' == '' AND '$(OutputType)'=='WinExe'">Exe</VB6OutputType>
+      <VB6OutputType Condition="'$(VB6OutputType)' == '' AND '$(OutputType)'=='Exe'">Exe</VB6OutputType>
+      <VB6OutputType Condition="'$(VB6OutputType)' == '' AND '$(OutputType)'=='Library'">OleDll</VB6OutputType>
+    </PropertyGroup>
+
+    <!-- Get the resolved COM references -->
+<!--    <CallTarget Targets="VB6ResolveComReferencePaths" />-->
+    <MergeComReferences ComReferences="@(COMReference)" ResolvedModules="@(VB6ResolvedModules)">
+      <Output TaskParameter="MergedItems" ItemName="VB6ResolvedReference"/>
+    </MergeComReferences>
+
+    <PropertyGroup>
+      <HasResourceFile>false</HasResourceFile>
+      <HasResourceFile Condition="'@(None)' != '' AND '%(None.Extension)' == '.res'">true</HasResourceFile>
+    </PropertyGroup>
+
+    <Message Text="VB6ResolvedReference=@(VB6ResolvedReference)"/>
+
+    <!-- Add the resolved references to the collection of files to copy to the output directory -->
+    <ItemGroup>
+        <AddModules Include="@(AddModules)"/>
+        <AddModules Include="@(VB6ResolvedReference->'%(FullPath)')"/>
+        <AddModules Include="@(VB6ResolvedReference->'%(AdditionalModules)')" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- First, the type of the project. -->
+      <VB6ProjectLine Include="Type=$(VB6OutputType)" />
+
+      <!-- Name of the project and file -->
+
+      <!--
+      The project name can be overriden in the project by setting the VB6ProjectName variable. This is to
+      help set a custom project name when the default name of the project (the filename) clashes with the name
+      of a module or class.
+      -->
+      <VB6ProjectLine Include="@(IntermediateAssembly->'Name=%(Filename)')" Condition="'$(VB6ProjectName)' == ''" />
+      <VB6ProjectLine Include="Name=$(VB6ProjectName)"  Condition="'$(VB6ProjectName)' != ''" />
+
+      <VB6ProjectLine Include="@(IntermediateAssembly->'Title=%(Filename)')" />
+
+      <!-- Add our reference lines (non OCX) -->
+       <VB6ProjectLine Include="@(VB6ResolvedReference->'Reference=*\G%(Guid)#%(VersionMajor).%(VersionMinor)#0#%(FullPath)#%(Name)')" Condition="'%(VB6ResolvedReference.Extension)' != '.ocx' AND '%(VB6ResolvedReference.WrapperTool)' != 'aximp' OR '%(VB6ResolvedReference.UseAsReferenceFlag)' == 'true'"/>
+      <!-- Now our COM control lines (OCX) -->
+      <VB6ProjectLine Include="@(VB6ResolvedReference->'Object=%(Guid)#%(VersionMajor).%(VersionMinor)#0; %(FullPath)')" Condition="'%(VB6ResolvedReference.Extension)' == '.ocx' AND '%(VB6ResolvedReference.UseAsReferenceFlag)' == 'false' OR '%(VB6ResolvedReference.WrapperTool)' == 'aximp'"/>
+
+      <!-- Add the forms, modules and classes -->
+      <VB6ProjectLine Include="@(Compile->'Form=%(FullPath)')" Condition="'%(Extension)' == '.frm'" />
+      <VB6ProjectLine Include="@(Compile->'Module=%(Filename); %(FullPath)')" Condition="'%(Extension)' == '.bas'" />
+      <VB6ProjectLine Include="@(Compile->'Class=%(Filename); %(FullPath)')" Condition="'%(Extension)' == '.cls'" />
+
+      <!-- To make it debuggable, we want to compile to native code, with no optimizations, and generate debug symbols. -->
+      <VB6ProjectLine Include="CompilationType=0" />
+      <VB6ProjectLine Include="CodeViewDebugInfo=-1" />
+      <VB6ProjectLine Include="OptimizationType=2" />
+
+      <!-- Include any resource file in the project. -->
+      <VB6ProjectLine Include="ResFile32=%(None.FullPath)" Condition="'$(HasResourceFile)' == 'true' AND '%(None.Extension)' == '.res'" />
+      <VB6ProjectLine Include="ResFile32=%(GeneratedFileVersionInfo.FullPath)" Condition="'@(GeneratedFileVersionInfo)' != '' AND '$(HasResourceFile)' != 'true'" />
+
+      <!-- Is there a compatibility file? -->
+      <VB6ProjectLine Include="CompatibleMode=%(None.CompatibleMode)" Condition="'@(None)' != '' AND '%(None.CompatibleMode)' != ''" />
+      <VB6ProjectLine Include="CompatibleEXE32=%(None.FullPath)" Condition="'@(None)' != '' AND '%(None.CompatibleMode)' != ''" />
+
+      <!-- For ActiveX projects, generate type library and registration info file. -->
+      <VB6ProjectLine Include="ServerSupportFiles=1" />
+
+      
+      <VB6ProjectLine Include="CondComp=&quot;SUBCLASS = 1&quot;"/>
+      
+
+      <!-- Startup form -->
+      <VB6ProjectLine Include="Startup=%22(None)%22" Condition="'$(VB6OutputType)' != 'Exe'" />
+      <VB6ProjectLine Include="Startup=%(Compile.Filename)" Condition="'%(Compile.Startup)' == 'true'" />
+
+      <!-- Icon Form -->
+      <VB6ProjectLine Include="IconForm=%(Compile.Filename)" Condition="'%(Compile.Icon)' == 'true'" />
+
+      <!--VB6ProjectLine Include="Startup=frmMain" Condition="'$(VB6ProjectType)' == 'Exe'" /-->
+
+      <!-- Our output location -->
+      <VB6ProjectLine Include="ExeName32=%(IntermediateAssembly.FullPath)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <GeneratedProjectFile Include="@(IntermediateAssembly->'%(RootDir)%(Directory)%(Filename).g.vbp')"/>
+      <VB6Manifest Include="@(IntermediateAssembly->'%(RootDir)%(Directory)%(Filename).manifest')"/>
+      <VB6TypeLibrary Include="@(IntermediateAssembly->'%(RootDir)%(Directory)%(Filename).tlb')"/>
+    </ItemGroup>
+
+    <!-- Now save the file -->
+    <WriteLinesToFile Encoding="ASCII" Lines="@(VB6ProjectLine)" File="@(GeneratedProjectFile)" Overwrite="true" />
+
+    <!-- Now compile -->
+
+    <!-- Make sure Visual Basic 6 is installed and available. -->
+    <Error Condition="!Exists($(VB6Path))" Text="Visual Basic 6 can't be found. Make sure it's installed! Path: $(VB6Path)"/>
+
+    <ItemGroup>
+      <VB6Log Include="@(GeneratedProjectFile->'%(FullPath).log')"/>
+    </ItemGroup>
+
+    <!-- First, clear the log -->
+    <Delete Files="@(VB6Log)"/>
+
+    <Message Importance="high" Text="Compiling Visual Basic 6 Project %(GeneratedProjectFile.FullPath)"/>
+
+    <Exec Command="%22$(VB6Path)%22 /MAKE /OUT %22@(VB6Log)%22 %22@(GeneratedProjectFile)%22" ContinueOnError="true" >
+      <Output PropertyName="VB6ExitCode" TaskParameter="ExitCode"/>
+    </Exec>
+
+    <!-- Capture the log output and echo it out. -->
+    <ReadLinesFromFile File="@(VB6Log)">
+      <Output ItemName="VB6LogLines" TaskParameter="Lines"/>
+    </ReadLinesFromFile>
+
+    <!-- If there were errors, echo out the lines as errors, otherwise just as a message. -->
+    <Message Importance="high" Text="@(VB6LogLines, '%0a%0d')"  Condition="'$(VB6ExitCode)' == '0'"/>
+    <Error Text="Error building %(GeneratedProjectFile.Filename):%0a%0d@(VB6LogLines, '%0a%0d')" Condition="'$(VB6ExitCode)' != '0'" />
+
+    <!-- If the build failed, we need to fail the job with an error. -->
+    <Error Text="Error when building VB6 Project" Condition="'$(VB6ExitCode)' != '0'"/>
+
+    <ItemGroup>
+      <_CoreCompileResourceInputs Remove="@(_CoreCompileResourceInputs)" />
+    </ItemGroup>
+
+    <CallTarget Targets="$(TargetsTriggeredByCompilation)" Condition="'$(TargetsTriggeredByCompilation)' != ''"/>
+
+  </Target>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+
+  <!--
+    =========================================================================
+    We override this task from Common targets, because it will fail when
+    trying to get the assembly identity (with the target not being
+    a .NET assembly). We will return the assembly identity version manually.
+    =========================================================================
+    -->
+  <Target
+      Name="_DeploymentComputeNativeManifestInfo"
+      Condition="'$(GenerateClickOnceManifests)'!='true'">
+
+    <!-- Create list of items for manifest generation -->
+    <ResolveManifestFiles NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)">
+      <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependencies"/>
+    </ResolveManifestFiles>
+
+    <PropertyGroup>
+      <_DeploymentManifestType>Native</_DeploymentManifestType>
+    </PropertyGroup>
+
+    <!-- Obtain manifest version from the built assembly -->
+<!--    <GetAssemblyIdentity AssemblyFiles="@(IntermediateAssembly)">-->
+<!--      <Output TaskParameter="Assemblies" ItemName="_IntermediateAssemblyIdentity"/>-->
+<!--    </GetAssemblyIdentity>-->
+
+<!--    <PropertyGroup>-->
+<!--      <_DeploymentManifestVersion>@(_IntermediateAssemblyIdentity->'%(Version)')</_DeploymentManifestVersion>-->
+<!--    </PropertyGroup>-->
+
+    <PropertyGroup>
+      <_DeploymentManifestVersion>1.0.0.0</_DeploymentManifestVersion>
+    </PropertyGroup>
+
+  </Target>
+
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\$(MSBuildThisFile)\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\$(MSBuildThisFile)\ImportAfter')"/>
+
+</Project>
