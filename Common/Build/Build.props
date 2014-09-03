@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProductNameString>Visual Basic 6X</ProductNameString>
+    <ProductMajorVersion>1</ProductMajorVersion>
+    <ProductMinorVersion>0</ProductMinorVersion>
+    <ReleaseQuality>Final</ReleaseQuality>
+    <AssemblyKeyFileName>VisualBasic6X.snk</AssemblyKeyFileName>
+    <KeyFilePublicKeyToken>45ef3195f5ccfdc7</KeyFilePublicKeyToken>
+    <KeyFilePublicKey>0024000004800000940000000602000000240000525341310004000001000100ff13ab339b1693c8627f6f3e61c5d4c0a6255b02f1a76300b847e22eb1835433537ec56be4aad4c9a10ec77aec09f7b98629dca4842a6053b41d37971bab81f3ac6d65c2df862fd9052490fc14f1a11048b810a06a23c10eebf10295295c4ce33bcd971fdd866e19cc27c6515e4ba1be928e4a8ccdf6089df3afb0a0278480dd</KeyFilePublicKey>
+    <NamespaceBase>VisualBasic6X.</NamespaceBase>
+    <RootNamespace Condition=" '$(RootNamespace)' == '' ">$(MSBuildProjectName)</RootNamespace>
+    <ReferencePath>$(MSBuildThisFileDirectory)\..\Libraries\</ReferencePath>
+    <OutputPath>..\..\Bin\</OutputPath>
+  </PropertyGroup>
+</Project>

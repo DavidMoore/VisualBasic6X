@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- This value is set when this file has been included, so you can test for this value before including. -->
+    <PropertyGroup>
+        <BuildPropertiesLoaded Condition="'$(BuildPropertiesLoaded)' == ''">true</BuildPropertiesLoaded>
+    </PropertyGroup>
+
+    <!-- Include optional properties that can override the defaults in this file. -->
+    <Import Project="$(MSBuildThisFileDirectory)\Build.props" Condition="Exists('$(MSBuildThisFileDirectory)\Build.props')" />
+
+    <PropertyGroup>
+
+    <CompanyName Condition="'$(CompanyName)' == ''">Sad Robot</CompanyName>
+    <Copyright Condition="'$(Copyright)' == ''">Copyright (c) $(CompanyName) $([System.DateTime]::Now.ToString("yyyy"))</Copyright>
+    <Trademark Condition="'$(Trademark)' == ''">$(CompanyName)</Trademark>
+
+        <ProductNameString Condition="'$(ProductNameString)' == '' AND '$(SolutionName)' != '' ">$(SolutionName)</ProductNameString>
+        <ProductNameString Condition="'$(ProductNameString)' == '' ">$(MSBuildProjectName)</ProductNameString>
+        <ProductMajorVersion Condition="'$(ProductMajorVersion)' == ''">1</ProductMajorVersion>
+        <ProductMinorVersion Condition="'$(ProductMinorVersion)' == ''">0</ProductMinorVersion>
+
+        <!-- Release type values: Alpha, Beta, RC, Final etc. -->
+        <ReleaseQuality Condition="'$(ReleaseQuality)' == ''">Final</ReleaseQuality>
+    </PropertyGroup>
+
+    <!-- Generate the build number -->
+    <PropertyGroup Condition=" '$(BuildVersion)' == '' ">
+        <BuildVersion>$([System.DateTime]::Now.Year.ToString().Substring(3))$([System.DateTime]::Now.ToString("MMdd"))</BuildVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <UseScc>false</UseScc>
+    </PropertyGroup>
+
+  <PropertyGroup>
+
+    <!-- File version -->
+    <MajorVersion Condition="'$(MajorVersion)' == ''">$(ProductMajorVersion)</MajorVersion>
+    <MinorVersion Condition="'$(MinorVersion)' == ''">$(ProductMinorVersion)</MinorVersion>
+    <BuildVersion Condition="'$(BuildVersion)' == ''">$(BuildVersion)</BuildVersion>
+    <RevisionVersion Condition="'$(RevisionVersion)' == ''">$([System.DateTime]::Now.ToString("HHmm"))</RevisionVersion>
+    <FileVersionString Condition="'$(FileVersionString)' == ''">$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</FileVersionString>
+
+    <ProductBuildVersion Condition="'$(ProductBuildVersion)' == ''">$(BuildVersion)</ProductBuildVersion>
+    <ProductRevisionVersion Condition="'$(ProductRevisionVersion)' == ''">$(RevisionVersion)</ProductRevisionVersion>
+    <ProductVersionString Condition="'$(ProductVersionString)' == ''">$(ProductMajorVersion).$(ProductMinorVersion).$(ProductBuildVersion).$(ProductRevisionVersion)</ProductVersionString>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UnitTestProject Include="$(MSBuildThisFileDirectory)\..\..\**\*Tests*.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="@(UnitTestProject->'%(Filename), PublicKey=$(KeyFilePublicKey)')"/>
+  </ItemGroup>
+</Project>

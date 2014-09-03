@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="AfterBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- Include the build properties, but only if they haven't been included yet, which is determined by the BuildPropertiesLoaded property. -->
+    <Import Project="$(MSBuildThisFileDirectory)\Build.Common.props" Condition="'$(BuildPropertiesLoaded)' == ''" />
+
+    <!-- This causes our build targets to automatically get included after the Microsoft.Common.targets in every project file -->
+    <PropertyGroup>
+      <!-- The BranchRootDir is the root folder of the entire branch / trunk. Because this file is in Commons\Build,
+           we should be able to find the root directory of the branch by going up two directories. -->
+      <BranchRootDir>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..\..\"))</BranchRootDir>
+      <BranchRootDir>$([System.IO.Path]::GetFullPath($(BranchRootDir)))</BranchRootDir>
+
+      <!-- Set the absolute path to the commons dir -->
+      <CommonsDir>$([System.IO.Path]::Combine($(BranchRootDir), "Common"))\</CommonsDir>
+        <CustomAfterMicrosoftCommonTargets>$(MSBuildThisFileDirectory)\Build.Tasks.targets</CustomAfterMicrosoftCommonTargets>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- Default configuration and platform -->
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5</TargetFrameworkVersion>
+        <TargetFrameworkProfile Condition="'$(TargetFrameworkProfile)' == ''" />
+        <FileAlignment>512</FileAlignment>
+        <SchemaVersion>2.0</SchemaVersion>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <CLSCompliant Condition="'$(CLSCompliant)' == ''">false</CLSCompliant>
+        <OutputType Condition="'$(OutputType)' == ''">Library</OutputType>
+
+        <!-- Assembly name and namespaces -->
+        <NamespaceBase Condition=" '$(NamespaceBase)' == '' ">$(ProductNameString).</NamespaceBase>
+        <RootNamespace Condition=" '$(RootNamespace)' == '' ">$(NamespaceBase)$(MSBuildProjectName)</RootNamespace>
+        <AssemblyName  Condition=" '$(AssemblyName)' == '' ">$(RootNamespace)</AssemblyName>
+
+        <!-- Compilation and outputs -->
+        <OutputPath Condition=" '$(OutputPath)' == '' ">Bin\$(Configuration)\</OutputPath>
+        <OutDir Condition=" '$(OutDir)' == '' ">$(OutputPath)\</OutDir>
+        <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+        <ErrorReport Condition=" '$(ErrorReport)' == '' ">prompt</ErrorReport>
+        <WarningLevel Condition=" '$(WarningLevel)' == '' ">4</WarningLevel>
+        <OverwriteReadOnlyFiles Condition="'$(OverwriteReadOnlyFiles)' == ''">true</OverwriteReadOnlyFiles>
+        <UseVSHostingProcess Condition=" '$(UseVSHostingProcess)' == '' ">false</UseVSHostingProcess>
+
+        <!-- Signing -->
+        <SignAssembly Condition=" '$(SignAssembly)' == '' ">true</SignAssembly>
+        <AssemblyKeyFileName Condition="'$(AssemblyKeyFileName)' == ''">$(ProductNameString).snk</AssemblyKeyFileName>
+        <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">$(MSBuildThisFileDirectory)\$(AssemblyKeyFileName)</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <!-- Source control binding -->
+    <PropertyGroup Condition="$(UseScc)=='true'">
+        <SccProjectName>SAK</SccProjectName>
+        <SccLocalPath>SAK</SccLocalPath>
+        <SccAuxPath>SAK</SccAuxPath>
+        <SccProvider>SAK</SccProvider>
+    </PropertyGroup>
+
+    <!-- By default, build to Any CPU (MSIL). If it's a Windows application, build to x86 (32-bit). -->
+    <PropertyGroup>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <PlatformTarget Condition=" '$(OutputType)' == 'WinExe' ">x86</PlatformTarget>
+    </PropertyGroup>
+
+    <!-- Debug -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>full</DebugType>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <Optimize>false</Optimize>
+    </PropertyGroup>
+
+    <!-- Release -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <RunCodeAnalysis Condition="'$(RunCodeAnalysis)' == ''">true</RunCodeAnalysis>
+        <DebugType>pdbonly</DebugType>
+        <DefineConstants>TRACE</DefineConstants>
+        <DefineConstants Condition="'$(RunCodeAnalysis)' == 'true'">$(DefineConstants);CODE_ANALYSIS</DefineConstants>
+        <Optimize>true</Optimize>
+        <DocumentationFile>$(OutDir)$(AssemblyName).xml</DocumentationFile>
+        <NoWarn>1591;$(NoWarn)</NoWarn>
+        <Obfuscate>false</Obfuscate>
+        <Authenticode>true</Authenticode>
+    </PropertyGroup>
+
+    <!-- Collect some information about this build -->
+    <PropertyGroup>
+        <BuildDateTime>$([System.DateTime]::Now.ToUniversalTime().ToString("M/d/yyyy hh:mm:ss tt"))</BuildDateTime>
+        <BuildMachine>$([System.Environment]::ExpandEnvironmentVariables("%COMPUTERNAME%"))</BuildMachine>
+        <BuildUser>$([System.Environment]::ExpandEnvironmentVariables("%USERNAME%"))</BuildUser>
+    </PropertyGroup>
+
+    <!-- Localization -->
+    <PropertyGroup>
+        <!-- This is the culture that our default strings use. i.e. US English. -->
+        <NeutralCulture>en-US</NeutralCulture>
+    </PropertyGroup>
+
+    <!-- Ensure standard properties have been set -->
+    <PropertyGroup>
+        <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildStartupDirectory)</SolutionDir>
+        <SolutionDir Condition="!HasTrailingSlash($(SolutionDir))">$(SolutionDir)\</SolutionDir>
+        <SolutionName Condition="'$(SolutionName)' == ''">$(ProjectName)</SolutionName>
+        <!--UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable-->
+    </PropertyGroup>
+
+  <PropertyGroup>
+    <ReferencePath>$(CommonsDir)Libraries\</ReferencePath>
+  </PropertyGroup>
+
+  <!-- If it's a WiX project, define a bunch of properties as constants so that we can get to them from the WiX Project -->
+  <PropertyGroup>
+    <ProductPatchVersion Condition="'$(ProductPatchVersion)' == ''">0</ProductPatchVersion>
+    <DefineConstants Condition="'$(WixTargetsPath)' != ''">$(DefineConstants);ProductMajorVersion=$(ProductMajorVersion);ProductMinorVersion=$(ProductMinorVersion);ProductPatchVersion=$(ProductPatchVersion);InstallerVersion=$(ProductVersionString);SuiteProductName=$(SuiteProductName);SuiteShortName=$(SuiteShortName);BuildProjectName=$(BuildProjectName);ProductVersionString=$(ProductVersionString);ProductDescription=$(ProductDescription);ProductReleaseQuality=$(ProductReleaseQuality);CompanyName=$(CompanyName);Copyright=$(Copyright);BuildDateTime=$(BuildDateTime)</DefineConstants>
+    <DefineConstants Condition="'$(WixTargetsPath)' !='' AND '$(DefineSolutionProperties)' == 'false'">$(DefineConstants);SolutionDir=$(SolutionDir)</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Hard coded to get the location of 7.0A SDK -->
+  <PropertyGroup>
+    <WindowsSdkDir Condition="'$(WindowsSdkDir)' == ''">C:\Program Files (x86)\Windows Kits\8.0\bin\x86\</WindowsSdkDir>
+    <!--WindowsSdkDir Condition="'$(WindowsSdkDir)' == '' OR !Exists($(WindowsSdkDir))">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A@InstallationFolder)bin\</WindowsSdkDir-->
+  </PropertyGroup>
+
+    <!-- For speed, don't copy any assembly or project references. -->
+    <!--ItemDefinitionGroup>
+        <Reference>
+            <Private>false</Private>
+        </Reference>
+        <ProjectReference>
+            <Private>false</Private>
+        </ProjectReference>
+    </ItemDefinitionGroup-->
+
+    <!--
+    For executables or web sites, we do want to copy references so it will run properly.
+    {349C5851-65DF-11DA-9384-00065B846F21} = Web Application
+    {E24C65DC-7377-472B-9ABA-BC803B73C61A} = Web Site
+    -->
+    <!--ItemDefinitionGroup Condition=" '$(OutputType)' == 'WinExe' OR $(ProjectGuids.ToUpper().Contains('{349C5851-65DF-11DA-9384-00065B846F21}')) OR $(ProjectGuids.ToUpper().Contains('{E24C65DC-7377-472B-9ABA-BC803B73C61A}'))">
+        <Reference>
+            <Private>true</Private>
+        </Reference>
+        <ProjectReference>
+            <Private>true</Private>
+        </ProjectReference>
+    </ItemDefinitionGroup-->
+</Project>

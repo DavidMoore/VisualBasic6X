@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- This file gets included from Build.Common.targets, so you might want to check that file first. -->
+
+  <!-- Information on what project type / language we're compiling. -->
+  <PropertyGroup>
+    <Language Condition=" '$(Language)' == '' ">C#</Language>
+    <IsManagedCode Condition="'$(Language)' == 'VB' OR '$(Language)' == 'C#'">true</IsManagedCode>
+    <IsManagedCode Condition="'$(IsManagedCode)' == ''">false</IsManagedCode>
+  </PropertyGroup>
+
+  <!-- Task for versioning project outputs. -->
+  <UsingTask TaskName="VersionOutput" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <Language ParameterType="System.String" Required="true" />
+
+      <GeneratedAssemblyInfo ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+      <GeneratedFileVersionInfo ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+      <GeneratedFileVersionInfoResourceFile ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+
+      <OutputType ParameterType="System.String"  Required="true" />
+      <ResourceCompilerPath ParameterType="System.String"  Required="true" />
+
+      <!-- Branding -->
+      <IconFile ParameterType="Microsoft.Build.Framework.ITaskItem" />
+      <ProductName ParameterType="System.String"  Required="true" />
+      <Copyright ParameterType="System.String"  Required="true" />
+      <Company ParameterType="System.String"  Required="true" />
+      <FileDescription ParameterType="System.String"  Required="true" />
+
+      <!-- Version -->
+      <FileVersion ParameterType="System.String"  Required="true" />
+      <ProductVersion ParameterType="System.String"  Required="true" />
+      <AssemblyVersion ParameterType="System.String"  Required="true" />
+
+      <ManifestFile ParameterType="System.String" />
+
+      <!-- Internals -->
+      <InternalsVisibleTo ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="false"/>
+
+      <!-- Advanced and debug / special -->
+      <InternalName ParameterType="System.String" Required="true" />
+      <OriginalFileName ParameterType="System.String" Required="true" />
+      <PrivateBuildDescription ParameterType="System.String" />
+      <SpecialBuildDescription ParameterType="System.String" />
+      <AdditionalResourceScript ParameterType="System.String" />
+      <IsPreRelease ParameterType="System.Boolean" Required="true" />
+      <IsSpecialBuild ParameterType="System.Boolean" Required="true" />
+      <IsPrivateBuild ParameterType="System.Boolean" Required="true" />
+      <IsPatched ParameterType="System.Boolean" Required="true" />
+      <IsDebug ParameterType="System.Boolean" Required="true" />
+
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.Diagnostics" />
+      <!-- Languages: C#, VB, C++ -->
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+
+            string[] exclusions = new[] { 
+              "FullPath", "RootDir", "Filename", "Extension", "RelativeDir", "Directory", 
+              "RecursiveDir", "Identity", "ModifiedTime", "CreatedTime", "AccessedTime",
+              "DefiningProjectFullPath", "DefiningProjectDirectory", "DefiningProjectName", "DefiningProjectExtension"};
+
+            string[] namespaces = new []
+            {
+            "System", "System.Reflection", "System.Runtime.CompilerServices", "System.Runtime.InteropServices"
+            };
+
+            // Default language is C#.
+            var isManagedCode = !Language.Equals("C++");
+            var usingFormat = "using {0};";
+            var assemblyAttributeFormat = "[assembly: {0}({1})]";
+
+            // Detect if they want VisualBasic
+            if( isManagedCode && Language.Equals("VB") )
+            {
+                usingFormat = "Imports {0}";
+                assemblyAttributeFormat = "<Assembly: {0}({1})>";
+            }
+
+            // Scan meta data for assembly properties to apply
+            var metaDataNames = GeneratedAssemblyInfo.MetadataNames;
+
+            var properties = new Dictionary<string, string>();
+
+            foreach (string metaDataName in metaDataNames)
+            {
+                var name = metaDataName;
+                if (exclusions.Any(s => string.Equals(s, name, StringComparison.OrdinalIgnoreCase))) continue;
+                properties[metaDataName] = GeneratedAssemblyInfo.GetMetadata(metaDataName);
+            }
+
+            var sb = new StringBuilder();
+
+            // Include the namespaces
+            foreach (var usingNamespace in namespaces)
+            {
+                sb.AppendFormat(usingFormat, usingNamespace).AppendLine();
+            }
+
+            // Create the assembly attributes
+            foreach (var property in properties)
+            {
+                sb.AppendLine().AppendFormat(assemblyAttributeFormat, property.Key, property.Value);
+            }
+
+            // Internals visible to
+            if( InternalsVisibleTo != null )
+            {
+                foreach(var internals in InternalsVisibleTo)
+                {
+                    sb.AppendLine().AppendFormat(assemblyAttributeFormat, "InternalsVisibleTo", "\"" + internals.GetMetadata("Identity") + "\"");
+                }
+            }
+
+            // Now write to the file
+            var file = new FileInfo(GeneratedAssemblyInfo.GetMetadata("FullPath"));
+            if(!file.Directory.Exists) file.Directory.Create(); // Ensure the directory exists
+            File.WriteAllText(file.FullName, sb.ToString(), Encoding.UTF8);
+
+            // Now we generate the file version resource file
+            sb = new StringBuilder();
+
+            // Base defines
+            sb.Append(@"#define VS_FILE_INFO            RT_VERSION
+#define VS_USER_DEFINED         100
+#define VS_FFI_FILEFLAGSMASK    0x0000003FL
+#define VS_FF_DEBUG             0x00000001L
+#define VS_FF_PRERELEASE        0x00000002L
+#define VS_FF_PATCHED           0x00000004L
+#define VS_FF_PRIVATEBUILD      0x00000008L
+#define VS_FF_INFOINFERRED      0x00000010L
+#define VS_FF_SPECIALBUILD      0x00000020L
+#define VOS__WINDOWS32          0x00000004L
+#define VFT_APP                 0x00000001L
+#define LANG_ENGLISH 0x09
+#define SUBLANG_ENGLISH_US 0x01    // English (USA)
+//LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+LANGUAGE 0, 0").AppendLine();
+
+            sb.AppendFormat("#define VER_DEBUG  {0}", IsDebug ? "VS_FF_DEBUG" : "0").AppendLine();
+            sb.AppendFormat("#define VER_PRERELEASE  {0}", IsPreRelease ? "VS_FF_PRERELEASE" : "0").AppendLine();
+            sb.AppendFormat("#define VER_PRIVATEBUILD  {0}", IsPrivateBuild ? "VS_FF_PRIVATEBUILD" : "0").AppendLine();
+            sb.AppendFormat("#define VER_SPECIALBUILD  {0}", IsSpecialBuild ? "VS_FF_SPECIALBUILD" : "0").AppendLine();
+            sb.AppendFormat("#define VER_PATCHED  {0}", IsPatched ? "VS_FF_PATCHED" : "0").AppendLine();
+
+            // Manifest file?
+            if( !string.IsNullOrEmpty(ManifestFile) )
+            {
+              sb.AppendLine("#define APP_MANIFEST 1");
+              sb.AppendLine("#define RT_MANIFEST 24");
+              sb.AppendFormat("APP_MANIFEST RT_MANIFEST \"{0}\\0\"", ManifestFile.Replace("\"", "\\\"")).AppendLine();
+            }
+
+            // Icon File
+            if( OutputType.Equals("WinExe", StringComparison.OrdinalIgnoreCase) && IconFile != null )
+            {
+              sb.AppendFormat("IDI_MAIN_ICON ICON \"{0}\"", IconFile.GetMetadata("FullPath").Replace("\\", "\\\\")).AppendLine();
+            }
+
+            var fileVersionValue = new Version(FileVersion);
+            var productVersionValue = new Version(ProductVersion);
+
+            // Version information
+            sb.AppendLine("#define VS_VERSION_INFO         1");
+            sb.AppendLine("VS_VERSION_INFO VERSIONINFO");
+
+            sb.AppendFormat(" FILEVERSION {0},{1},{2},{3}", fileVersionValue.Major, fileVersionValue.Minor,
+              fileVersionValue.Build, fileVersionValue.Revision).AppendLine();
+
+            sb.AppendFormat(" PRODUCTVERSION {0},{1},{2},{3}", productVersionValue.Major, productVersionValue.Minor,
+              productVersionValue.Build, productVersionValue.Revision).AppendLine();
+
+            sb.AppendLine(" FILEFLAGSMASK VS_FFI_FILEFLAGSMASK");
+            sb.AppendLine(" FILEFLAGS (VER_PRIVATEBUILD|VS_FF_PATCHED|VER_SPECIALBUILD|VER_PRERELEASE|VER_DEBUG)");
+            sb.AppendLine(" FILEOS VOS__WINDOWS32");
+
+            // File type of 1 is a Windows exe, and 2 is a DLL.
+            sb.AppendFormat(" FILETYPE {0}", OutputType.Equals("WinExe", StringComparison.OrdinalIgnoreCase) ? 1 : 2 ).AppendLine();
+
+            // File sub types are for things like device drivers, font files etc. We don't need them.
+            sb.AppendLine(" FILESUBTYPE 0");
+
+            // The file info string resource block
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("    BLOCK \"StringFileInfo\"");
+            sb.AppendLine("    BEGIN");
+            sb.AppendLine("        BLOCK \"000004b0\"");
+            sb.AppendLine("        BEGIN");
+            sb.AppendFormat("            VALUE \"CompanyName\", \"{0}\"", Company).AppendLine();
+            sb.AppendFormat("            VALUE \"FileDescription\", \"{0}\"", FileDescription).AppendLine();
+            sb.AppendFormat("            VALUE \"FileVersion\", \"{0}\"", FileVersion).AppendLine();
+            sb.AppendFormat("            VALUE \"InternalName\", \"{0}\"", InternalName).AppendLine();
+            sb.AppendFormat("            VALUE \"LegalCopyright\", \"{0}\"", Copyright).AppendLine();
+            sb.AppendFormat("            VALUE \"OriginalFilename\", \"{0}\"", OriginalFileName).AppendLine();
+            sb.AppendFormat("            VALUE \"ProductName\", \"{0}\"", ProductName).AppendLine();
+            sb.AppendFormat("            VALUE \"ProductVersion\", \"{0}\"", ProductVersion).AppendLine();
+
+            // Special build description
+            if(IsSpecialBuild) sb.AppendFormat("            VALUE \"SpecialBuild\", \"{0}\"", SpecialBuildDescription).AppendLine();
+
+            // Private build description
+            if(IsPrivateBuild) sb.AppendFormat("            VALUE \"PrivateBuild\", \"{0}\"", PrivateBuildDescription).AppendLine();
+
+            // Assembly version
+            if(isManagedCode) sb.AppendFormat("            VALUE \"Assembly Version\", \"{0}\"", AssemblyVersion).AppendLine();
+
+            sb.AppendLine("        END");
+            sb.AppendLine("    END");
+            sb.AppendLine("    BLOCK \"VarFileInfo\"");
+            sb.AppendLine("    BEGIN");
+            sb.AppendLine("        VALUE \"Translation\", 0x0000 0x04B0");
+            sb.AppendLine("    END");
+            sb.AppendLine("END");
+
+            var resourceFile = new FileInfo( GeneratedFileVersionInfoResourceFile.GetMetadata("FullPath") );
+
+            Log.LogMessage("Resource File path: " + resourceFile.FullName);
+
+            // Write out the resource script contents
+            if(!resourceFile.Directory.Exists) resourceFile.Directory.Create(); // Ensure the directory exists
+            File.WriteAllText(resourceFile.FullName, sb.ToString());
+
+            // Any additional script?
+            if (!string.IsNullOrWhiteSpace(AdditionalResourceScript))
+            {
+                using (var writer = resourceFile.AppendText())
+                {
+                    writer.WriteLine();
+                    writer.WriteLine(AdditionalResourceScript);
+                }
+            }
+
+            // Compile the resource file
+            var processStartInfo = new ProcessStartInfo(ResourceCompilerPath)
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                Arguments = string.Format("/D _UNICODE /D UNICODE /l\"0x0409\" /nologo /fo\"{0}\" \"{1}\"",
+                    GeneratedFileVersionInfo.GetMetadata("FullPath"), resourceFile.FullName),
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true
+            };
+
+            Log.LogMessage("Executing: {0} {1}", processStartInfo.FileName, processStartInfo.Arguments);
+
+            using (var process = Process.Start(processStartInfo))
+            {
+                process.WaitForExit();
+
+                string output = process.StandardOutput.ReadToEnd();
+                if (output.Length > 0) Log.LogMessage(MessageImportance.Normal, output);
+
+                string errorStream = process.StandardError.ReadToEnd();
+                if (errorStream.Length > 0) Log.LogError(errorStream);
+
+                if (process.ExitCode == 0) return true;
+
+                Log.LogError("Non-zero exit code from rc.exe: " + process.ExitCode);
+
+                return false;
+            }
+            ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <!-- Task for reading in all the assembly attributes from an existing AssemblyInfoFile, by setting the attributes as metadata. -->
+  <UsingTask TaskName="ReadAssemblyInfo" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <!-- This is the task item pointing to the assembly info file we want to read. The file's attributes will be read in,
+               and set as metadata on the task item. -->
+      <AssemblyInfoFile ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.Text.RegularExpressions" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+
+            string propertyRegex = "^[\\[<][aA]ssembly\\s*:\\s*([^(]+)\\(\"([^\"]*)\"\\)[\\]>]";
+
+            var file = new FileInfo(AssemblyInfoFile.GetMetadata("FullPath"));
+
+            if(!file.Exists) throw new FileNotFoundException("Assembly info file not found", file.FullName);
+
+            // Read in the contents
+            var lines = File.ReadAllText(file.FullName);
+
+            Log.LogMessage("Assembly info file: {0}", file.FullName);
+
+            var regex = new Regex(propertyRegex, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+            // Load in the matches
+            foreach (var match in regex.Matches(lines).Cast<Match>())
+            {
+                var name = match.Groups[1].Value;
+                var value = match.Groups[2].Value;
+
+                Log.LogMessage("Setting {0} to \"{1}\"", name, value);
+                AssemblyInfoFile.SetMetadata(name, value);
+            }
+            ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <!-- Used to generate COM isolation manifest code and embed it into the assembly. -->
+  <UsingTask TaskName="Mt" AssemblyName="Microsoft.Build.CppTasks.Common, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+
+  <!-- Defines the path and filename for the generated assembly info, and adds it as a compilation item.
+         This means it will be included when the project is built by Visual Studio or MSBuild. -->
+  <ItemGroup>
+    <GeneratedAssemblyInfo Include="$(IntermediateOutputPath)AssemblyInfo.g.cs">
+      <AssemblyCompany>%22$(CompanyName)%22</AssemblyCompany>
+      <AssemblyConfiguration>%22$(Configuration)%22</AssemblyConfiguration>
+      <AssemblyCopyright>%22$(Copyright)%22</AssemblyCopyright>
+      <AssemblyFileVersion>%22$(FileVersionString)%22</AssemblyFileVersion>
+      <AssemblyInformationalVersion>%22$(ProductVersionString)%22</AssemblyInformationalVersion>
+      <AssemblyProduct>%22$(ProductNameString)%22</AssemblyProduct>
+      <AssemblyVersion>%22$(MajorVersion).$(MinorVersion).0.0%22</AssemblyVersion>
+      <CLSCompliant>$(CLSCompliant)</CLSCompliant>
+      <ComVisible>false</ComVisible>
+    </GeneratedAssemblyInfo>
+    <Compile Include="@(GeneratedAssemblyInfo)" Condition="'$(IsManagedCode)' == 'true'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <GeneratedFileVersionInfo Include="$(IntermediateOutputPath)FileVersionInfo.g.res"/>
+    <GeneratedFileVersionInfoResourceFile Include="$(IntermediateOutputPath)FileVersionInfo.g.rc"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <VersioningOutput Include="@(GeneratedAssemblyInfo)" Condition="'$(IsManagedCode)' == 'true'" />
+    <VersioningOutput Include="@(GeneratedFileVersionInfo)"/>
+    <VersioningOutput Include="@(GeneratedFileVersionInfoResourceFile)"/>
+  </ItemGroup>
+
+  <!-- The files that involve the versioning -->
+  <ItemGroup>
+    <VersioningSource Include="$(MSBuildProjectFullPath)"/>
+    <VersioningSource Include="$(MSBuildThisFile)"/>
+    <VersioningSource Include="$(MSBuildThisFileDirectory)\Build.Common.props"/>
+    <VersioningSource Include="$(MSBuildThisFileDirectory)\Build.Common.targets"/>
+  </ItemGroup>
+
+  <!-- This is the target that actually versions the output. -->
+  <Target Name="VersionOutput" Inputs="@(VersioningSource)" Outputs="@(VersioningOutput)">
+
+    <!-- Try to read the existing assembly info file if it exists -->
+    <ItemGroup>
+      <ExistingAssemblyInfo Include="$(AppDesignerFolder)\AssemblyInfo.vb" Condition="'$(Language)' == 'VB'" />
+      <ExistingAssemblyInfo Include="$(AppDesignerFolder)\AssemblyInfo.cs" Condition="'$(Language)' == 'C#'" />
+    </ItemGroup>
+    <ReadAssemblyInfo AssemblyInfoFile="@(ExistingAssemblyInfo)" Condition="Exists(@(ExistingAssemblyInfo))">
+      <Output TaskParameter="AssemblyInfoFile" ItemName="ExistingAssemblyInfo" />
+    </ReadAssemblyInfo>
+
+    <PropertyGroup>
+      <IsDebug>false</IsDebug>
+      <IsPreRelease>true</IsPreRelease>
+      <IsPrivateBuild>True</IsPrivateBuild>
+      <IsSpecialBuild>$(IsPreRelease)</IsSpecialBuild>
+      <AssemblyVersion>$(MajorVersion).$(MinorVersion).0.0</AssemblyVersion>
+
+      <!-- If the AssemblyTitle property isn't set, default it to AssemblyName -->
+      <AssemblyTitle Condition="'$(AssemblyTitle)' == '' AND '%(ExistingAssemblyInfo.AssemblyTitle)' != ''">%(ExistingAssemblyInfo.AssemblyTitle)</AssemblyTitle>
+      <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
+
+      <!-- Conditional overrides -->
+      <IsDebug Condition="'$(Configuration)' == 'Debug'">false</IsDebug>
+      <IsPreRelease Condition="'$(ProductReleaseQuality)' == 'Final'">false</IsPreRelease>
+      <IsPrivateBuild Condition="'$(IsBuildServer)' == 'true'">False</IsPrivateBuild>
+      <PrivateBuildDescription>Built by $(BuildUser) on $(BuildMachine) at $(BuildDateTime)</PrivateBuildDescription>
+      <SpecialBuildDescription>$(ProductDescription)</SpecialBuildDescription>
+
+      <!-- Get the path to the resource compiler -->
+      <ResourceCompilerPath>$(WindowsSdkDir)rc.exe</ResourceCompilerPath>
+
+    </PropertyGroup>
+
+    <Message Text="Build version: $(BuildVersion)"/>
+    <Message Text="File version: $(FileVersionString)"/>
+    <Message Text="Product version: $(ProductVersionString)"/>
+
+    <VersionOutput Language="$(Language)"
+                   GeneratedFileVersionInfo="@(GeneratedFileVersionInfo)"
+                   GeneratedFileVersionInfoResourceFile="@(GeneratedFileVersionInfoResourceFile)"
+                   GeneratedAssemblyInfo="@(GeneratedAssemblyInfo)"
+                                 Company="$(CompanyName)"
+                                 Copyright="$(Copyright)"
+                  FileDescription="$(AssemblyTitle)"
+                                 FileVersion="$(FileVersionString)"
+                                 IconFile="$(IconFile)"
+                                 InternalName="$(AssemblyName)"
+                                 IsDebug="$(IsDebug)"
+                  IsPatched="false"
+                                 IsPreRelease="$(IsPreRelease)"
+                                 IsPrivateBuild="$(IsPrivateBuild)"
+                                 IsSpecialBuild="$(IsSpecialBuild)"
+                                 ManifestFile="$(ApplicationManifest)"
+                  OriginalFileName="$(TargetFileName)"
+                                 PrivateBuildDescription="$(PrivateBuildDescription)"
+                                 ProductName="$(ProductNameString)"
+                                 ProductVersion="$(ProductVersionString)"
+                                 SpecialBuildDescription="$(SpecialBuildDescription)"
+                                 AssemblyVersion="$(AssemblyVersion)"
+                  ResourceCompilerPath="$(ResourceCompilerPath)"
+                   OutputType="$(OutputType)"
+                   InternalsVisibleTo="@(InternalsVisibleTo)"
+                                 />
+
+    <!-- We now reset the ApplicationManifest and ApplicationIcon properties
+             so we can use the Win32Resource instead (which contains both of these things embedded). -->
+    <PropertyGroup>
+      <ApplicationManifest></ApplicationManifest>
+      <ApplicationIcon></ApplicationIcon>
+      <Win32Resource>@(GeneratedFileVersionInfo)</Win32Resource>
+    </PropertyGroup>
+
+    <!-- This includes the file version resource in C++ projects. -->
+    <ItemGroup>
+      <Resource Include="@(GeneratedFileVersionInfo)" Condition="'$(UseOfMFC)' != ''" />
+    </ItemGroup>
+
+  </Target>
+
+  <!-- This target runs protector on the current binary -->
+  <Target Name="Obfuscate" Condition="'$(WixTargetsPath)' == ''">
+
+    <PropertyGroup>
+      <ProtectorPath>$(MSBuildThisFileDirectory)\Protector\protector.exe</ProtectorPath>
+
+      <!-- Standard arguments -->
+      <ProtectorArgs>-keepdebug -neutral -nologo</ProtectorArgs>
+
+      <!-- If the project is signed, we need to re-sign it with Protector -->
+      <ProtectorArgs Condition="'$(AssemblyOriginatorKeyFile)' != ''">$(ProtectorArgs) -sign %22$(AssemblyOriginatorKeyFile)%22</ProtectorArgs>
+
+      <!-- Some projects need default constructors to be generated with the cctor arg. We don't know much about what this does exactly. -->
+      <ProtectorArgs Condition="'$(ObfuscateGenerateConstructor)' == 'true'">$(ProtectorArgs) -cctor</ProtectorArgs>
+
+      <!-- Specify the CLR version. This is to prevent the "Yet to handle multiple .NET Framework runtime" popup message. -->
+      <ProtectorArgs Condition="'$(TargetFrameworkVersion)' == 'v4.0'">$(ProtectorArgs) -clrversion v4.0.30319</ProtectorArgs>
+      <ProtectorArgs Condition="'$(TargetFrameworkVersion)' == 'v3.5'">$(ProtectorArgs) -clrversion v2.0.50727</ProtectorArgs>
+      <ProtectorArgs Condition="'$(TargetFrameworkVersion)' == 'v3.0'">$(ProtectorArgs) -clrversion v2.0.50727</ProtectorArgs>
+      <ProtectorArgs Condition="'$(TargetFrameworkVersion)' == 'v2.0'">$(ProtectorArgs) -clrversion v2.0.50727</ProtectorArgs>
+    </PropertyGroup>
+
+    <Message Text="Obfuscating $(TargetPath)..."/>
+
+    <Exec Command="%22$(ProtectorPath)%22 $(ProtectorArgs) %22$(TargetPath)%22 -out %22$(TargetPath)%22" />
+  </Target>
+
+  <!-- This target deletes the generated assembly info file -->
+  <Target Name="DeleteVersionArtifacts">
+    <Delete Files="@(VersioningOutput)" />
+  </Target>
+
+  <Target Name="AuthenticodeSign" Condition=" '$(AuthenticodeArguments)' != '' ">
+    <Message Text="Signing binaries with Microsoft Authenticode." />
+    <Message Text="Thumbprint: $(AuthenticodeThumbprint)" />
+    <Message Text="Timestamp URL: $(AuthenticodeTimestampUrl)" />
+
+    <Exec Command= "%22$(WindowsSdkDir)SignTool.exe%22 $(AuthenticodeArguments) %22$(TargetPath)%22" />
+  </Target>
+
+  <!-- We override these properties from Visual C#, allowing us to register our targets in the right place. -->
+  <PropertyGroup>
+    <!-- This ensures our target that generates the assembly info is called before the build starts -->
+    <BuildDependsOn>VersionOutput;CopyReferencedProjectOutputs;$(BuildDependsOn)</BuildDependsOn>
+    <!-- This ensures our target that deletes the assembly info is called when Clean is called. -->
+    <CleanDependsOn>DeleteVersionArtifacts;$(CleanDependsOn)</CleanDependsOn>
+
+    <BeforeBuildGenerateSourcesTargets>CopyReferencedProjectOutputs;$(BeforeBuildGenerateSourcesTargets);</BeforeBuildGenerateSourcesTargets>
+  </PropertyGroup>
+
+  <!-- Copy C++ project outputs -->
+  <Target Name="CopyReferencedProjectOutputs">
+
+    <!-- Get the C++ project references -->
+    <ItemGroup>
+      <NativeProjectReference Include="@(_MSBuildProjectReferenceExistent)" Condition="'%(Extension)' == '.vcxproj'"/>
+    </ItemGroup>
+
+    <!-- Now harvest their outputs -->
+    <MSBuild Projects="@(NativeProjectReference)"
+             Targets="GetNativeTargetPath"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="Platform=Win32;Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="ReferencedProjectOutputs"/>
+    </MSBuild>
+
+    <!-- Link the libraries in if this is a C++ project -->
+    <ItemGroup>
+      <ReferencedLibrary Include="@(ReferencedProjectOutputs)" Condition="'%(Extension)' == '.lib'" />
+    </ItemGroup>
+    <ItemGroup>
+      <Library Include="@(ReferencedLibrary)" Condition="'$(Language)' == 'C++'"/>
+    </ItemGroup>
+
+    <Message Text="Project outputs: @(ReferencedProjectOutputs)"/>
+    <Message Text="Referenced libraries: @(ReferencedLibrary)"/>
+
+    <!-- Also copy local for the references -->
+    <Copy SourceFiles="@(ReferencedLibrary)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+
+  </Target>
+
+  <Target Name="DisableDEP">
+
+    <Message Text="Marking binary as non-DEP compatible (see http://blogs.msdn.com/ed_maurer/archive/2007/12/14/nxcompat-and-the-c-compiler.aspx)"/>
+
+    <!-- Get the path to Visual C++ -->
+    <PropertyGroup>
+      <VCInstallPath>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\SxS\VC7@10.0)</VCInstallPath>
+      <VSInstallPath>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0@InstallDir)</VSInstallPath>
+    </PropertyGroup>
+    <Message Text="Visual C++ found at: $(VCInstallPath)" Importance="low"/>
+    <!--    EnvironmentVariables="PATH=$(PATH);$(VSInstallPath)"-->
+
+    <Exec
+          Command="%22$(VCInstallPath)Bin\editbin.exe%22 /NXCOMPAT:NO %22$(TargetPath)%22"
+          WorkingDirectory="$(VSInstallPath)"
+          />
+
+    <!-- We've tampered with the file, so re-sign it -->
+    <Exec Command="%22$(WindowsSdkDir)sn.exe%22 -R %22$(TargetPath)%22 %22$(AssemblyOriginatorKeyFile)%22" />
+
+    <!-- call "%25VS100COMNTOOLS%25vsvars32.bat" -->
+  </Target>
+
+  <Target Name="COMIsolation">
+
+    <!-- Copy native files to destination -->
+    <Copy SourceFiles="@(NativeLibrary)" DestinationFolder="$(TargetDir)"/>
+
+    <!-- Copy COM files to destination -->
+    <Copy SourceFiles="@(COMLibrary)" DestinationFolder="$(TargetDir)"/>
+
+    <!-- Generate manifests -->
+    <Mt AssemblyIdentity="$(AssemblyName),version=$(MajorVersion).$(MinorVersion).0.0,publicKeyToken=$(KeyFilePublicKeyToken),processorArchitecture=x86"
+        TypeLibraryFile="%(COMLibrary.FullPath)"
+        ComponentFileName="%(COMLibrary.Filename)%(COMLibrary.Extension)"
+        SuppressStartupBanner="true"
+        OutputManifestFile="%(COMLibrary.FullPath).manifest"
+        VerboseOutput="true"
+        ToolPath="$(WindowsSdkDir)"/>
+
+    <ItemGroup>
+      <COMLibraryManifest Include="%(COMLibrary.FullPath).manifest" />
+    </ItemGroup>
+
+    <Message Text="Manifests to embed: @(COMLibraryManifest)"/>
+
+    <!-- Now merge all manifests, embedding into this library -->
+    <Mt AssemblyIdentity="$(AssemblyName),version=$(MajorVersion).$(MinorVersion).0.0,publicKeyToken=$(KeyFilePublicKeyToken),processorArchitecture=x86"
+        Sources="@(COMLibraryManifest)"
+        EmbedManifest="true"
+        SuppressStartupBanner="true"
+        OutputResourceManifests="$(TargetPath)"
+        VerboseOutput="true"
+        UpdateFileHashes="true"
+        UpdateFileHashesSearchPath="$(TargetDir)"
+        ToolPath="$(WindowsSdkDir)"/>
+
+    <!-- We've changed the assembly so we'll need to sign it again -->
+    <Exec Command="%22$(WindowsSdkDir)sn.exe%22 -R %22$(TargetPath)%22 %22$(AssemblyOriginatorKeyFile)%22"/>
+
+  </Target>
+
+  <!-- Using ILMerge to merge referenced assemblies, resulting in one .dll / .exe  -->
+  <Target Name="MergeReferences">
+    <CreateItem Include="@(ReferencePath)" Condition="'%(CopyLocal)'=='true'">
+      <Output TaskParameter="Include" ItemName="MergeReferences"/>
+    </CreateItem>
+    <Exec Command="%22$(CommonsDir)Build\BuildAssemblies\ILMerge.exe%22 /targetplatform:v4,$(MSBuildBinPath) /keyfile:%22$(AssemblyOriginatorKeyFile)%22 /out:%22$(TargetPath)%22 %22@(IntermediateAssembly)%22 @(MergeReferences->'&quot;%(FullPath)&quot;', ' ')"/>
+  </Target>
+
+  <UsingTask TaskName="TransformXml" AssemblyFile="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\Web\Microsoft.Web.Publishing.Tasks.dll" />
+  <Target Name="AfterCompile" Condition="Exists('app.$(Configuration).config')">
+    <!-- Generate transformed app config in the intermediate directory -->
+    <TransformXml Source="app.config" Destination="$(IntermediateOutputPath)$(TargetFileName).config" Transform="app.$(Configuration).config" />
+    <!-- Force build process to use the transformed configuration file from now on. -->
+    <ItemGroup>
+      <AppConfigWithTargetPath Remove="app.config" />
+      <AppConfigWithTargetPath Include="$(IntermediateOutputPath)$(TargetFileName).config">
+        <TargetPath>$(TargetFileName).config</TargetPath>
+      </AppConfigWithTargetPath>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AfterBuild">
+
+    <!-- Any content files to copy? -->
+    <ItemGroup>
+      <CopyDependency Include="@(None)" Condition="'%(None.DeploymentContent)' == 'true'"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(CopyDependency)" DestinationFolder="$(OutDir)"/>
+
+    <!-- ILMerge to merge references into the dll/exe -->
+    <CallTarget Targets="MergeReferences" Condition=" '$(MergeReferences)' == 'true' " />
+
+    <!-- Do we need to register the output? -->
+    <Exec Command="regsvr32.exe /s %22$(TargetPath)%22" ContinueOnError="true" Condition="'$(RegisterAfterBuild)' == 'true'"/>
+
+    <CallTarget Targets="COMIsolation" Condition=" '@(COMLibrary)' != '' " />
+    <CallTarget Targets="DisableDEP" Condition="'$(DisableDataExecutionProtection)' == 'true'" />
+    <CallTarget Targets="Obfuscate" Condition="'$(Obfuscate)' == 'true'" />
+    <CallTarget Targets="AuthenticodeSign" Condition="'$(Authenticode)' == 'true'" />
+  </Target>
+
+</Project>
