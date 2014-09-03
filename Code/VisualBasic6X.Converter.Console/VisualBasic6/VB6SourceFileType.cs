@@ -1,4 +1,4 @@
-namespace Foundation.Build.VisualBasic6
+namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
     public enum VB6SourceFileType
     {

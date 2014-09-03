@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using Microsoft.Build.Evaluation;
-
-namespace Foundation.Build.MSBuild.VisualBasic6.Converter
+namespace VisualBasic6X.Converter.Console.VisualBasic6.Converter
 {
-    using Foundation.Build.VisualBasic6;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using Microsoft.Build.Evaluation;
 
     /// <summary>
     /// Converts a Visual Basic 6 project to the new .vbpx MSBuild project format.

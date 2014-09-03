@@ -6,7 +6,8 @@
     <ProjectGuid>{4FA8186A-12A1-4CAC-8395-051363CD01D6}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile></TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <Import Project="..\..\Common\Build\Build.Common.targets" />
   <ItemGroup>
@@ -26,7 +27,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VB6ProjectReader.cs" />
     <Compile Include="VisualBasic6\Converter\ProjectConverter.cs" />
     <Compile Include="VisualBasic6\ReferenceType.cs" />
     <Compile Include="VisualBasic6\VB6Project.cs" />

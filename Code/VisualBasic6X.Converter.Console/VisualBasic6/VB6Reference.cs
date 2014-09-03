@@ -1,8 +1,8 @@
-using System;
-using System.Globalization;
-
-namespace Foundation.Build.VisualBasic6
+namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
+    using System;
+    using System.Globalization;
+
     public class VB6Reference
     {
         public VB6Reference(Guid guid, string version, string fileName, string description)

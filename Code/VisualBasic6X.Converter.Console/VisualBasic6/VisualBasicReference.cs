@@ -1,7 +1,7 @@
-using System;
-
-namespace Foundation.Build.MSBuild.VisualBasic6
+namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
+    using System;
+
     internal class VisualBasicReference
     {
         public VisualBasicReference(Guid guid, string version, string filename, string description)

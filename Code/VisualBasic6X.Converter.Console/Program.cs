@@ -1,8 +1,9 @@
-﻿using System.Diagnostics;
-using Foundation.Build.MSBuild.VisualBasic6.Converter;
-
-namespace Foundation.Build.VisualBasic6.Converter.Console
+﻿namespace VisualBasic6X.Converter.Console
 {
+    using System.Diagnostics;
+    using VisualBasic6;
+    using VisualBasic6.Converter;
+
     class Program
     {
         const string usage = @"

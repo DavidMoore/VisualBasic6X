@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-
-namespace Foundation.Build.MSBuild.VisualBasic6
+namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using Microsoft.Build.Framework;
+    using Microsoft.Build.Utilities;
+
     public class Vb6ProjectItems : Task
     {
         private IList<ITaskItem> classes;

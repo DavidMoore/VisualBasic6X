@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-
-namespace Foundation.Build.VisualBasic6
+namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
+    using System.Collections.Generic;
+
     public class VB6Project
     {
         /// <summary>

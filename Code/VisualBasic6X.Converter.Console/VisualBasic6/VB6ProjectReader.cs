@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-
-namespace Foundation.Build.VisualBasic6
+namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
     public class VB6ProjectReader
     {
         /// <summary>
