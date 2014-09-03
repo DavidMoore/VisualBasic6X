@@ -32,44 +32,50 @@ namespace VisualBasic6X.Converter.Console
             foreach (var line in lines)
             {
                 // Split the key and value
-                string[] keyAndValue = line.Split(new[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
-                Debug.Assert(keyAndValue.Length == 2, "Key and value not split correctly", "Project line: {0}", line);
-                string key = keyAndValue[0].ToLower(CultureInfo.InvariantCulture);
-                string value = keyAndValue[1].Replace("\"", "").Trim();
-
+                var result = ParseProjectLine(line);
+                
                 // Are there any existing entries for this key?
                 IList<string> valueCollection;
 
-                if (!results.TryGetValue(key, out valueCollection))
+                if (!results.TryGetValue(result.Key, out valueCollection))
                 {
                     // There are no entries for this key so we'll have to initialize it first
                     valueCollection = new List<string>();
                 }
 
-                valueCollection.Add(value);
+                valueCollection.Add(result.Value);
 
-                results[key] = valueCollection;
+                results[result.Key] = valueCollection;
             }
 
             return new VB6ProjectProperties(results);
         }
 
+        internal static KeyValuePair<string, string> ParseProjectLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line)) return default(KeyValuePair<string,string>);
+
+            var index = line.IndexOf("=", StringComparison.Ordinal);
+            if( index < 0) throw new ArgumentException("This project line doesn't contain an expected equals sign (=): " + line);
+
+            string key = line.Substring(0, index).ToLowerInvariant();
+            string value = line.Substring(index + 1).Replace("\"", "").Trim();
+
+            return new KeyValuePair<string, string>(key, value);
+        }
+
         public VB6Project Parse(string fileName)
         {
             var values = Read(fileName);
-            var project = new VB6Project
-                              {
-                                  FileName = fileName,
-                                  Name = values.GetSingleValue("Name"),
-                                  ProjectType =
-                                      (VB6ProjectType)
-                                      Enum.Parse(typeof (VB6ProjectType), values.GetSingleValue("Type")),
-                                  Startup = values.GetSingleValue("Startup"),
-                                  IconForm = values.GetSingleValue("IconForm"),
-                                  CompatibilityFile = values.GetSingleValue("CompatibleEXE32"),
-                                  CompatibilityMode = values.GetSingleValue("CompatibleMode"),
-                                  ResourceFile = values.GetSingleValue("ResFile32")
-                              };
+            var project = new VB6Project();
+            project.FileName = fileName;
+            project.Name = values.GetSingleValue("Name");
+            project.ProjectType = (VB6ProjectType)Enum.Parse(typeof (VB6ProjectType), values.GetSingleValue("Type"));
+            project.Startup = values.GetSingleValue("Startup");
+            project.IconForm = values.GetSingleValue("IconForm");
+            project.CompatibilityFile = values.GetSingleValue("CompatibleEXE32");
+            project.CompatibilityMode = values.GetSingleValue("CompatibleMode");
+            project.ResourceFile = values.GetSingleValue("ResFile32");
 
 
             // Parse in the source files

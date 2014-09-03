@@ -5,7 +5,7 @@
     using System.Linq;
     using Converter.Console;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using VisualBasic6X.Tests.Helpers;
+    using Helpers;
 
     [TestClass]
     public class Read_method_on_VB6ProjectReader
