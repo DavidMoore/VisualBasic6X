@@ -1,9 +1,11 @@
 namespace VisualBasic6X.Converter.Console.VisualBasic6
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Serialization;
 
+    [Serializable]
     public class VB6ProjectProperties : Dictionary<string, IList<string>>
     {
         /// <summary>
