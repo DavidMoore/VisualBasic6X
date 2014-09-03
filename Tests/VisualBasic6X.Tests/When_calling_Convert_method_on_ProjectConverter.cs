@@ -2,8 +2,8 @@
 {
     using System;
     using System.IO;
+    using Converter.Console;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using VisualBasic6X.Converter.Console.VisualBasic6.Converter;
     using VisualBasic6X.Tests.Helpers;
 
     [TestClass]

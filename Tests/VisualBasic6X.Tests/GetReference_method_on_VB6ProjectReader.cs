@@ -1,8 +1,8 @@
 ﻿namespace VisualBasic6X.Tests
 {
     using System;
+    using Converter.Console;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using VisualBasic6X.Converter.Console.VisualBasic6;
 
     [TestClass]
     public class GetReference_method_on_VB6ProjectReader

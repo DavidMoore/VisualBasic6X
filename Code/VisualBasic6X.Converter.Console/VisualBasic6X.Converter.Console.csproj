@@ -27,18 +27,18 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VisualBasic6\Converter\ProjectConverter.cs" />
-    <Compile Include="VisualBasic6\ReferenceType.cs" />
-    <Compile Include="VisualBasic6\VB6Project.cs" />
-    <Compile Include="VisualBasic6\Vb6ProjectItems.cs" />
-    <Compile Include="VisualBasic6\VB6ProjectProperties.cs" />
-    <Compile Include="VisualBasic6\VB6ProjectReader.cs" />
-    <Compile Include="VisualBasic6\VB6ProjectType.cs" />
-    <Compile Include="VisualBasic6\VB6Reference.cs" />
-    <Compile Include="VisualBasic6\VB6ReferenceType.cs" />
-    <Compile Include="VisualBasic6\VB6SourceFile.cs" />
-    <Compile Include="VisualBasic6\VB6SourceFileType.cs" />
-    <Compile Include="VisualBasic6\VisualBasicReference.cs" />
+    <Compile Include="ProjectConverter.cs" />
+    <Compile Include="ReferenceType.cs" />
+    <Compile Include="VB6Project.cs" />
+    <Compile Include="Vb6ProjectItems.cs" />
+    <Compile Include="VB6ProjectProperties.cs" />
+    <Compile Include="VB6ProjectReader.cs" />
+    <Compile Include="VB6ProjectType.cs" />
+    <Compile Include="VB6Reference.cs" />
+    <Compile Include="VB6ReferenceType.cs" />
+    <Compile Include="VB6SourceFile.cs" />
+    <Compile Include="VB6SourceFileType.cs" />
+    <Compile Include="VisualBasicReference.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

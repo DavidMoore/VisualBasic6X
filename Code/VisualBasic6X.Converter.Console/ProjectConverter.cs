@@ -1,4 +1,4 @@
-namespace VisualBasic6X.Converter.Console.VisualBasic6.Converter
+namespace VisualBasic6X.Converter.Console
 {
     using System;
     using System.Collections.Generic;

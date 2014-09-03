@@ -3,8 +3,8 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Converter.Console;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using VisualBasic6X.Converter.Console.VisualBasic6;
     using VisualBasic6X.Tests.Helpers;
 
     [TestClass]

@@ -1,8 +1,6 @@
 ﻿namespace VisualBasic6X.Converter.Console
 {
     using System.Diagnostics;
-    using VisualBasic6;
-    using VisualBasic6.Converter;
 
     class Program
     {

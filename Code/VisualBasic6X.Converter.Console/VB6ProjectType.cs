@@ -1,4 +1,4 @@
-namespace VisualBasic6X.Converter.Console.VisualBasic6
+namespace VisualBasic6X.Converter.Console
 {
     /// <summary>
     /// VB6 project compilation types.
