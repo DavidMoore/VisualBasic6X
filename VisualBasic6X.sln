@@ -1,11 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasic6X", "Code\VisualBasic6X\VisualBasic6X.csproj", "{F4ADEBDB-CD20-4532-B4E3-FE7424F5369C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasic6X.Converter.Console", "Code\VisualBasic6X.Converter.Console\VisualBasic6X.Converter.Console.csproj", "{4FA8186A-12A1-4CAC-8395-051363CD01D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{0B305C5C-43F8-467D-BD8F-C78F7994289D}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasic6X.Tests", "Tests\VisualBasic6X.Tests\VisualBasic6X.Tests.csproj", "{726148AB-380C-4628-8268-F651CC742062}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +45,16 @@ Global
 		{4FA8186A-12A1-4CAC-8395-051363CD01D6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4FA8186A-12A1-4CAC-8395-051363CD01D6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4FA8186A-12A1-4CAC-8395-051363CD01D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Release|Any CPU.Build.0 = Release|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{726148AB-380C-4628-8268-F651CC742062}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
