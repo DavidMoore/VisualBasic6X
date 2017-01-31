@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+
+    <RegistryKey Key="Packages\{a4a21ad2-9481-4d82-94ea-70e9c96ab4f1}">
+        <RegistryValue Value="VisualBasic6ProjectPackage" Type="string" KeyPath="yes" />
+        <RegistryValue Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+        <RegistryValue Name="Class" Value="VisualBasic6.VisualBasic6ProjectPackage" Type="string" />
+        <RegistryValue Name="CodeBase" Value="[#VisualBasic6X.dll]" Type="string" />
+    </RegistryKey>
+
+    <RegistryKey Key="MSBuild\SafeImports">
+        <RegistryValue Name="VisualBasic6CompilerTasks" Value="[INSTALLFOLDER]VisualBasic6.targets" Type="string" />
+    </RegistryKey>
+
+    <RegistryKey Key="CLSID\{e6946aca-60b8-42bb-bf07-f3501e4a3086}">
+        <RegistryValue Value="VisualBasic6.GeneralPropertyPage" Type="string" />
+        <RegistryValue Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+        <RegistryValue Name="Class" Value="VisualBasic6.GeneralPropertyPage" Type="string" />
+        <RegistryValue Name="CodeBase" Value="[#VisualBasic6X.dll]" Type="string" />
+        <RegistryValue Name="ThreadingModel" Value="Both" Type="string" />
+    </RegistryKey>
+
+    <RegistryKey Key="Projects\{478b2a9d-a929-41e2-a608-d2aef497cada}">
+        <RegistryValue Value="VisualBasic6ProjectFactory" Type="string" />
+        <RegistryValue Name="DisplayName" Value="Visual Basic 6" Type="string" />
+        <RegistryValue Name="DisplayProjectFileExtensions" Value="Visual Basic 6 Project Files (*.vbpx);*.vbpx" Type="string" />
+        <RegistryValue Name="DisableOnlineTemplates" Value="1" Type="integer" />
+        <RegistryValue Name="Package" Value="{a4a21ad2-9481-4d82-94ea-70e9c96ab4f1}" Type="string" />
+        <RegistryValue Name="DefaultProjectExtension" Value="vbpx" Type="string" />
+        <RegistryValue Name="PossibleProjectExtensions" Value="vbpx" Type="string" />
+        <RegistryValue Name="ProjectTemplatesDir" Value="[INSTALLFOLDER]Templates\Projects" Type="string" />
+        <RegistryValue Name="Language(VsTemplate)" Value="Visual Basic 6 Language Template" Type="string" />
+        <RegistryValue Name="DisplayProjectType(VsTemplate)" Value="Visual Basic 6 Project Type" Type="string" />
+        <RegistryValue Name="ProjectSubType(VsTemplate)" Value="Visual Basic 6 Subtype" Type="string" />
+
+        <RegistryKey Key="AddItemTemplates\TemplateDirs\{a4a21ad2-9481-4d82-94ea-70e9c96ab4f1}\/1">
+            <RegistryValue Value="Visual Basic 6" Type="string"/>
+            <RegistryValue Name="TemplatesDir" Value="[INSTALLFOLDER]Templates\ProjectItems" Type="string" />
+            <RegistryValue Name="SortPriority" Value="500" Type="integer" />
+        </RegistryKey>
+        
+    </RegistryKey>   
+
+    <RegistryKey Key="NewProjectTemplates\TemplateDirs\{a4a21ad2-9481-4d82-94ea-70e9c96ab4f1}\/1">
+        <RegistryValue Value="Visual Basic 6" Type="string" />
+        <RegistryValue Name="SortPriority" Value="100" Type="integer" />
+        <RegistryValue Name="TemplatesDir" Value="[INSTALLFOLDER]Templates\Projects" Type="string" />
+    </RegistryKey>
+</Include>

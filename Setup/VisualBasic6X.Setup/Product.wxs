@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Name="Visual Basic 6X" Language="1033" Version="1.1.0.0" Manufacturer="Sad Robot" UpgradeCode="3ff9bb2d-badb-48a2-ac58-835849bc5c81">
+        <Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        
+        <!--
+        This defines how the upgrades and downgrades work. You need to define the product
+        upgrade code in a variable called UpgradeCode.
+        -->
+        <Upgrade Id="3ff9bb2d-badb-48a2-ac58-835849bc5c81">
+            <!--
+            Having an inclusive minimum version of 0 means any version number facilitates
+            a major upgrade, i.e. allowing full upgrades or downgrades.
+            MigrateFeatures ensures that the same features the user selected in the original install are maintained.
+            -->
+            <UpgradeVersion Minimum="1.0.0.0" IncludeMinimum="yes" MigrateFeatures="yes" Property="WIX_UPGRADE_DETECTED"/>
+        </Upgrade>
+        
+        <MediaTemplate EmbedCab="yes" />
+
+        <?include "Variables.wxi" ?>
+
+        <Icon Id="Project.ico" SourceFile="$(var.VisualBasic6X.TargetDir)Project.ico"/>
+        
+        <Property Id="ARPNOMODIFY" Value="1"/>
+        <Property Id="ARPPRODUCTICON" Value="Project.ico"/>
+        <Property Id="ARPURLINFOABOUT" Value="https://davidmoore.github.io/VisualBasic6X/"/>
+        <Property Id="ARPCONTACT" Value="David Moore"/>
+        <Property Id="ARPCOMMENTS" Value="[ProductName] [ProductVersion]"/>
+        <SetProperty Id="ARPINSTALLLOCATION" Value="[INSTALLFOLDER]" After="CostFinalize" />
+
+        <FeatureRef Id="Extension" />
+        <FeatureRef Id="VisualStudio10Feature" />
+        <FeatureRef Id="VisualStudio11Feature" />
+        <FeatureRef Id="VisualStudio12Feature" />
+        <FeatureRef Id="VisualStudio14Feature" />
+        <FeatureRef Id="VisualStudio15Feature" />
+    </Product>
+</Wix>

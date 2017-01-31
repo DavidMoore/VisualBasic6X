@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+    <?include "Variables.wxi" ?>
+
+    <Fragment>
+
+        <Property Id="DEVENV12">
+            <RegistrySearch Type="file" Id="FindVS12" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\12.0\Setup\VS" Name="EnvironmentPath" Win64="no">
+                <FileSearch Name="devenv.exe" />
+            </RegistrySearch>
+        </Property>
+
+        <Feature Id="VisualStudio12Feature" Title="Visual Studio 2013 Integration" Level="0">
+            <ComponentGroupRef Id="VisualStudio12Components" />
+            <Condition Level="1">DEVENV12</Condition>
+        </Feature>
+
+        <ComponentGroup Id="VisualStudio12Components" Directory="INSTALLFOLDER">
+            <Component Id="VisualStudio12Extension">
+                <RegistryKey Root="HKCU" Key="Software\Microsoft\VisualStudio\12.0">
+                    <?include "Registration.wxi" ?>
+                </RegistryKey>
+            </Component>
+        </ComponentGroup>
+
+        <CustomAction Id="InitializeVS12Setup" Property="ExecuteVS12Setup" Value="&quot;[#DEVENV12]&quot; /setup" Execute="immediate" />
+        <CustomAction Id="ExecuteVS12Setup" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Return="check" Impersonate="no" />
+        <InstallExecuteSequence>
+            <Custom Action="InitializeVS12Setup" Before="InstallFinalize" />
+            <Custom Action="ExecuteVS12Setup" After="InitializeVS12Setup"><![CDATA[ (NOT REMOVE~="ALL") AND DEVENV12]]></Custom>
+        </InstallExecuteSequence>
+        <UI>
+            <ProgressText Action="ExecuteVS12Setup">Registering in Visual Studio 2013...</ProgressText>
+        </UI>
+    </Fragment>
+</Wix>

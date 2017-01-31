@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+    <?include "Variables.wxi" ?>
+
+    <Fragment>
+
+        <Property Id="DEVENV14">
+            <RegistrySearch Type="file" Id="FindVS14" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\Setup\VS" Name="EnvironmentPath" Win64="no">
+                <FileSearch Name="devenv.exe" />
+            </RegistrySearch>
+        </Property>
+
+        <Feature Id="VisualStudio14Feature" Title="Visual Studio 2015 Integration" Level="0">
+            <ComponentGroupRef Id="VisualStudio14Components" />
+            <Condition Level="1">DEVENV14</Condition>
+        </Feature>
+
+        <ComponentGroup Id="VisualStudio14Components" Directory="INSTALLFOLDER">
+            <Component Id="VisualStudio14Extension">
+                <RegistryKey Root="HKCU" Key="Software\Microsoft\VisualStudio\14.0">
+                    <?include "Registration.wxi" ?>
+                </RegistryKey>
+            </Component>
+        </ComponentGroup>
+
+        <CustomAction Id="InitializeVS14Setup" Property="ExecuteVS14Setup" Value="&quot;[#DEVENV14]&quot; /setup" Execute="immediate" />
+        <CustomAction Id="ExecuteVS14Setup" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Return="check" Impersonate="no" />
+        <InstallExecuteSequence>
+            <Custom Action="InitializeVS14Setup" Before="InstallFinalize" />
+            <Custom Action="ExecuteVS14Setup" After="InitializeVS14Setup"><![CDATA[ (NOT REMOVE~="ALL") AND DEVENV14]]></Custom>
+        </InstallExecuteSequence>
+        <UI>
+            <ProgressText Action="ExecuteVS14Setup">Registering in Visual Studio 2015...</ProgressText>
+        </UI>
+    </Fragment>
+</Wix>

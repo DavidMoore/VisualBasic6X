@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+
+        <Feature Id="Extension" Title="Visual Studio Extension" Level="1">
+            <ComponentGroupRef Id="Extension" />
+        </Feature>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="LocalAppDataFolder" Name="AppData">
+                <Directory Id="SadRobot" Name="SadRobot">
+                    <Directory Id="INSTALLFOLDER" Name="VisualBasic6X">
+
+                        <Directory Id="Resources" Name="Resources"></Directory>
+                        <Directory Id="Templates" Name="Templates">
+                            <Directory Id="ProjectItems" Name="ProjectItems">
+                                <Directory Id="ClassModule" Name="Class Module"/>
+                                <Directory Id="Form" Name="Form"/>
+                                <Directory Id="Module" Name="Module"/>
+                                <Directory Id="UserControl" Name="User Control"/>
+                            </Directory>
+                            <Directory Id="Projects" Name="Projects">
+                                <Directory Id="StandardEXE" Name="StandardEXE"></Directory>
+                            </Directory>
+                        </Directory>
+
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+
+        <ComponentGroup Id="Extension" Source="$(var.VisualBasic6X.TargetDir)">
+
+            <Component Id="Extension" Guid="*" Directory="INSTALLFOLDER">
+                <File Source="$(var.VisualBasic6X.TargetPath)" Id="VisualBasic6X.dll" KeyPath="yes" />
+                <RemoveFolder On="uninstall" Id="RemoveFolder" />
+            </Component>
+
+            <Component Directory="INSTALLFOLDER">
+                <File Name="extension.vsixmanifest" KeyPath="yes" />
+            </Component>
+            <Component Directory="INSTALLFOLDER">
+                <File Name="Project.ico" KeyPath="yes" />
+            </Component>
+            <Component Directory="INSTALLFOLDER">
+                <File Name="VisualBasic6.targets" KeyPath="yes" />
+            </Component>
+            <Component Directory="INSTALLFOLDER">
+                <File Name="VisualBasic6X.pkgdef" KeyPath="yes" />
+            </Component>
+
+            <Component Directory="Resources">
+                <File Source="$(var.VisualBasic6X.TargetDir)Project.ico" Name="Package.ico" KeyPath="yes" />
+            </Component>
+
+            <Component Directory="StandardEXE">
+                <File Source="$(var.VisualBasic6X.TargetDir)Project.ico" Name="Project.ico" Id="StandardEXE_Project.ico" KeyPath="yes" />
+            </Component>
+
+            <Component Directory="ClassModule">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Class Module\Class.cls" KeyPath="yes" />
+            </Component>
+
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\About Form.frm" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\About Form.frx" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\Dialog.frm" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\Form.frm" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\Options Dialog.frm" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\Options Dialog.frx" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\Splash Form.frm" KeyPath="yes" />
+            </Component>
+            <Component Directory="Form">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Form\Splash Form.frx" KeyPath="yes" />
+            </Component>
+            
+            <Component Directory="Module">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\Module\Module.bas" KeyPath="yes" />
+            </Component>
+            
+            <Component Directory="UserControl">
+                <File Source="$(var.VisualBasic6X.TargetDir)Templates\ProjectItems\User Control\User Control.ctl" KeyPath="yes" />
+            </Component>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

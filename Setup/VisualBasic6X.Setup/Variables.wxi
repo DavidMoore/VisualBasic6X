@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+    
+    <?define packageGuid = "{a4a21ad2-9481-4d82-94ea-70e9c96ab4f1}" ?>
+    <?define projectFactoryGuid = "{478b2a9d-a929-41e2-a608-d2aef497cada}" ?>
+    <?define propertyPageGuid = "{e6946aca-60b8-42bb-bf07-f3501e4a3086}" ?>
+    <?define projectNodeGuid = "{11d53952-ad6e-469a-a90c-36696f92b958}" ?>
+    <?define automationFileItemGuid = "{3ab20026-cf57-4674-a036-d7775891f4ff}" ?>
+    
+</Include>
