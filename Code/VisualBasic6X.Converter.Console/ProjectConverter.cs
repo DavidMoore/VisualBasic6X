@@ -132,7 +132,7 @@ namespace VisualBasic6X.Converter.Console
             }
 
             // We need to import the Visual Basic 6 build targets for this to compile properly.
-            project.Xml.AddImport(@"$(LocalAppData)\Microsoft\VisualStudio\10.0\Extensions\David Moore\Visual Basic 6 Integration\1.0\VisualBasic6.targets");
+            project.Xml.AddImport(@"$(LocalAppData)\SadRobot\VisualBasic6X\VisualBasic6.targets");
 
             // The converted project will be in the same location as the project, except with the .vbpx extension.
             var convertedProject = new FileInfo(Path.Combine(Path.GetDirectoryName(vb6Project.FileName), Path.GetFileNameWithoutExtension(vb6Project.Name) + ".vbpx"));
