@@ -26,7 +26,7 @@
 
     <!-- Generate the build number -->
     <PropertyGroup Condition=" '$(BuildVersion)' == '' ">
-        <BuildVersion>$([System.DateTime]::Now.Year.ToString().Substring(3))$([System.DateTime]::Now.ToString("MMdd"))</BuildVersion>
+        <BuildVersion Condition=" '$(BuildVersion)' == '' ">$([MSBuild]::Subtract($([System.DateTime]::Now.Year), 2015))$([System.DateTime]::Now.ToString("MMdd"))</BuildVersion>
     </PropertyGroup>
 
     <PropertyGroup>
