@@ -1,34 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="5AAC6560-7DB2-420B-B6CF-3E68AF499341">
-    <Name>Visual Basic 6X</Name>
-    <Author>David Moore</Author>
-    <Version>1.0.0.1</Version>
-    <Description xml:space="preserve">Visual Basic 6 integration into Visual Studio</Description>
-    <Locale>1033</Locale>
-    <Icon>Project.ico</Icon>
-    <InstalledByMsi>false</InstalledByMsi>
-    <SupportedProducts>
-      <!-- Visual Studio 2013 -->
-      <VisualStudio Version="12.0">
-        <Edition>Pro</Edition>
-        <Edition>VST_All</Edition>
-      </VisualStudio>
-      <!-- Visual Studio 2012 -->
-      <VisualStudio Version="11.0">
-        <Edition>Pro</Edition>
-        <Edition>VST_All</Edition>
-      </VisualStudio>
-      <!-- Visual Studio 2010 -->
-      <VisualStudio Version="10.0">
-        <Edition>Pro</Edition>
-        <Edition>VST_All</Edition>
-      </VisualStudio>
-    </SupportedProducts>
-    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.5" />
-  </Identifier>
-  <References />
-  <Content>
-    <VsPackage>VisualBasic6.pkgdef</VsPackage>
-  </Content>
+    <Identifier Id="5AAC6560-7DB2-420B-B6CF-3E68AF499341">
+        <Name>Visual Basic 6X</Name>
+        <Author>David Moore</Author>
+        <Version>1.1.0.0</Version>
+        <Description xml:space="preserve">Visual Basic 6 integration into Visual Studio</Description>
+        <Locale>1033</Locale>
+        <Icon>Project.ico</Icon>
+        <InstalledByMsi>true</InstalledByMsi>
+        <SupportedProducts>
+            <!-- Visual Studio 2017 -->
+            <VisualStudio Version="15.0">
+                <Edition>Pro</Edition>
+                <Edition>VST_All</Edition>
+            </VisualStudio>
+            <!-- Visual Studio 2015 -->
+            <VisualStudio Version="14.0">
+                <Edition>Pro</Edition>
+                <Edition>VST_All</Edition>
+            </VisualStudio>
+            <!-- Visual Studio 2013 -->
+            <VisualStudio Version="12.0">
+                <Edition>Pro</Edition>
+                <Edition>VST_All</Edition>
+            </VisualStudio>
+            <!-- Visual Studio 2012 -->
+            <VisualStudio Version="11.0">
+                <Edition>Pro</Edition>
+                <Edition>VST_All</Edition>
+            </VisualStudio>
+            <!-- Visual Studio 2010 -->
+            <VisualStudio Version="10.0">
+                <Edition>Pro</Edition>
+                <Edition>VST_All</Edition>
+            </VisualStudio>
+        </SupportedProducts>
+        <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.5" />
+    </Identifier>
+    <References />
+    <Content>
+        <VsPackage>VisualBasic6.pkgdef</VsPackage>
+    </Content>
 </Vsix>
