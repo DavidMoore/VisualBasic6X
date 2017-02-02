@@ -11,9 +11,15 @@
             </RegistrySearch>
         </Property>
 
+        <Property Id="DEVENV14LICENSE">
+            <RegistrySearch Type="raw" Id="FindVS14License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\14.0\community" Name="Install"/>
+            <!--<RegistrySearch Type="raw" Id="FindVS14License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\14.0\professional" Name="Install"/>
+            <RegistrySearch Type="raw" Id="FindVS14License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\14.0\enterprise" Name="Install"/>-->
+        </Property>
+
         <Feature Id="VisualStudio14Feature" Title="Visual Studio 2015 Integration" Level="0">
             <ComponentGroupRef Id="VisualStudio14Components" />
-            <Condition Level="1">DEVENV14</Condition>
+            <Condition Level="1">DEVENV14 AND DEVENV14LICENSE</Condition>
         </Feature>
 
         <ComponentGroup Id="VisualStudio14Components" Directory="INSTALLFOLDER">
@@ -24,14 +30,12 @@
             </Component>
         </ComponentGroup>
 
-        <CustomAction Id="InitializeVS14Setup" Property="ExecuteVS14Setup" Value="&quot;[#DEVENV14]&quot; /setup" Execute="immediate" />
-        <CustomAction Id="ExecuteVS14Setup" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Return="check" Impersonate="no" />
+        <CustomAction Id="VS14Setup" Property="DEVENV14" ExeCommand="/setup" Execute="deferred" Return="ignore" Impersonate="no" />
         <InstallExecuteSequence>
-            <Custom Action="InitializeVS14Setup" Before="InstallFinalize" />
-            <Custom Action="ExecuteVS14Setup" After="InitializeVS14Setup"><![CDATA[ (NOT REMOVE~="ALL") AND DEVENV14]]></Custom>
+            <Custom Action="VS14Setup" Before="InstallFinalize">DEVENV14 AND DEVENV14LICENSE</Custom>
         </InstallExecuteSequence>
         <UI>
-            <ProgressText Action="ExecuteVS14Setup">Registering in Visual Studio 2015...</ProgressText>
+            <ProgressText Action="VS14Setup">Registering in Visual Studio 2015...</ProgressText>
         </UI>
     </Fragment>
 </Wix>

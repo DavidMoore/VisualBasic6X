@@ -11,9 +11,16 @@
             </RegistrySearch>
         </Property>
 
+        <Property Id="DEVENV11LICENSE">
+            <RegistrySearch Type="raw" Id="FindVS11ProfessionalLicense" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\11.0\professional" Name="Install"/>
+            <RegistrySearch Type="raw" Id="FindVS11PremiumLicense" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\11.0\premium" Name="Install"/>
+            <RegistrySearch Type="raw" Id="FindVS11UltimateLicense" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\11.0\ultimate" Name="Install"/>
+            <!-- 1028, 1029, 1031, 1033, 1036, 1040, 1041, 1042, 1045, 1046, 1049, 1055, 2052, 3082  -->
+        </Property>
+
         <Feature Id="VisualStudio11Feature" Title="Visual Studio 2012 Integration" Level="0">
             <ComponentGroupRef Id="VisualStudio11Components" />
-            <Condition Level="1">DEVENV11</Condition>
+            <Condition Level="1">DEVENV11 AND DEVENV11LICENSE</Condition>
         </Feature>
 
         <ComponentGroup Id="VisualStudio11Components" Directory="INSTALLFOLDER">
@@ -24,11 +31,9 @@
             </Component>
         </ComponentGroup>
 
-        <CustomAction Id="InitializeVS11Setup" Property="ExecuteVS11Setup" Value="&quot;[#DEVENV11]&quot; /setup" Execute="immediate" />
-        <CustomAction Id="ExecuteVS11Setup" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Return="check" Impersonate="no" />
+        <CustomAction Id="VS11Setup" Property="DEVENV11" ExeCommand="/setup" Execute="deferred" Return="ignore" Impersonate="no" />
         <InstallExecuteSequence>
-            <Custom Action="InitializeVS11Setup" Before="InstallFinalize" />
-            <Custom Action="ExecuteVS11Setup" After="InitializeVS11Setup"><![CDATA[ (NOT REMOVE~="ALL") AND DEVENV11]]></Custom>
+            <Custom Action="VS11Setup" Before="InstallFinalize">DEVENV11 AND DEVENV11LICENSE</Custom>
         </InstallExecuteSequence>
         <UI>
             <ProgressText Action="ExecuteVS11Setup">Registering in Visual Studio 2012...</ProgressText>

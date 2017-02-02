@@ -11,9 +11,13 @@
             </RegistrySearch>
         </Property>
 
+        <Property Id="DEVENV15LICENSE">
+            <RegistrySearch Type="raw" Id="FindVS15License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\15.0\Core" Name="Install"/>
+        </Property>
+
         <Feature Id="VisualStudio15Feature" Title="Visual Studio 2017 Integration" Level="0">
             <ComponentGroupRef Id="VisualStudio15Components" />
-            <Condition Level="1">DEVENV15</Condition>
+            <Condition Level="1">DEVENV15 AND DEVENV15LICENSE</Condition>
         </Feature>
 
         <ComponentGroup Id="VisualStudio15Components" Directory="INSTALLFOLDER">
@@ -24,11 +28,9 @@
             </Component>
         </ComponentGroup>
 
-        <CustomAction Id="InitializeVS15Setup" Property="ExecuteVS15Setup" Value="&quot;[#DEVENV15]&quot; /setup" Execute="immediate" />
-        <CustomAction Id="ExecuteVS15Setup" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Return="check" Impersonate="no" />
+        <CustomAction Id="VS15Setup" Property="DEVENV15" ExeCommand="/setup" Execute="deferred" Return="ignore" Impersonate="no" />
         <InstallExecuteSequence>
-            <Custom Action="InitializeVS15Setup" Before="InstallFinalize" />
-            <Custom Action="ExecuteVS15Setup" After="InitializeVS15Setup"><![CDATA[ (NOT REMOVE~="ALL") AND DEVENV15]]></Custom>
+            <Custom Action="VS15Setup" Before="InstallFinalize">DEVENV15 AND DEVENV15LICENSE</Custom>
         </InstallExecuteSequence>
         <UI>
             <ProgressText Action="ExecuteVS15Setup">Registering in Visual Studio 2017...</ProgressText>

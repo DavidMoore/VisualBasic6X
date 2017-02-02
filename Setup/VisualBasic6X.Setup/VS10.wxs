@@ -11,9 +11,15 @@
             </RegistrySearch>
         </Property>
 
+        <Property Id="DEVENV10LICENSE">
+            <RegistrySearch Type="raw" Id="FindVS10ProfessionalLicense" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\10.0\PROCore" Name="Install"/>
+            <RegistrySearch Type="raw" Id="FindVS10PremiumLicense" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\10.0\VSTDCore" Name="Install"/>
+            <RegistrySearch Type="raw" Id="FindVS10UltimateLicense" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\10.0\VSTSCore" Name="Install"/>
+        </Property>
+
         <Feature Id="VisualStudio10Feature" Title="Visual Studio 2010 Integration" Level="0">
             <ComponentGroupRef Id="VisualStudio10Components" />
-            <Condition Level="1">DEVENV10</Condition>
+            <Condition Level="1">DEVENV10 AND DEVENV10LICENSE</Condition>
         </Feature>
 
         <ComponentGroup Id="VisualStudio10Components" Directory="INSTALLFOLDER">
@@ -24,11 +30,9 @@
             </Component>
         </ComponentGroup>
 
-        <CustomAction Id="InitializeVS10Setup" Property="ExecuteVS10Setup" Value="&quot;[#DEVENV10]&quot; /setup" Execute="immediate" />
-        <CustomAction Id="ExecuteVS10Setup" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Return="check" Impersonate="no" />
+        <CustomAction Id="VS10Setup" Property="DEVENV10" ExeCommand="/setup" Execute="deferred" Return="ignore" Impersonate="no" />
         <InstallExecuteSequence>
-            <Custom Action="InitializeVS10Setup" Before="InstallFinalize" />
-            <Custom Action="ExecuteVS10Setup" After="InitializeVS10Setup"><![CDATA[ (NOT REMOVE~="ALL") AND DEVENV10]]></Custom>
+            <Custom Action="VS10Setup" Before="InstallFinalize">DEVENV10 AND DEVENV10LICENSE</Custom>
         </InstallExecuteSequence>
         <UI>
             <ProgressText Action="ExecuteVS10Setup">Registering in Visual Studio 2010...</ProgressText>
