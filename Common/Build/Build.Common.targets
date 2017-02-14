@@ -6,13 +6,13 @@
 
     <!-- This causes our build targets to automatically get included after the Microsoft.Common.targets in every project file -->
     <PropertyGroup>
-      <!-- The BranchRootDir is the root folder of the entire branch / trunk. Because this file is in Commons\Build,
+        <!-- The BranchRootDir is the root folder of the entire branch / trunk. Because this file is in Commons\Build,
            we should be able to find the root directory of the branch by going up two directories. -->
-      <BranchRootDir>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..\..\"))</BranchRootDir>
-      <BranchRootDir>$([System.IO.Path]::GetFullPath($(BranchRootDir)))</BranchRootDir>
+        <BranchRootDir>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..\..\"))</BranchRootDir>
+        <BranchRootDir>$([System.IO.Path]::GetFullPath($(BranchRootDir)))</BranchRootDir>
 
-      <!-- Set the absolute path to the commons dir -->
-      <CommonsDir>$([System.IO.Path]::Combine($(BranchRootDir), "Common"))\</CommonsDir>
+        <!-- Set the absolute path to the commons dir -->
+        <CommonsDir>$([System.IO.Path]::Combine($(BranchRootDir), "Common"))\</CommonsDir>
         <CustomAfterMicrosoftCommonTargets>$(MSBuildThisFileDirectory)\Build.Tasks.targets</CustomAfterMicrosoftCommonTargets>
     </PropertyGroup>
 
@@ -103,22 +103,23 @@
         <!--UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable-->
     </PropertyGroup>
 
-  <PropertyGroup>
-    <ReferencePath>$(CommonsDir)Libraries\</ReferencePath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <ReferencePath>$(CommonsDir)Libraries\</ReferencePath>
+    </PropertyGroup>
 
-  <!-- If it's a WiX project, define a bunch of properties as constants so that we can get to them from the WiX Project -->
-  <PropertyGroup>
-    <ProductPatchVersion Condition="'$(ProductPatchVersion)' == ''">0</ProductPatchVersion>
-    <DefineConstants Condition="'$(WixTargetsPath)' != ''">$(DefineConstants);ProductMajorVersion=$(ProductMajorVersion);ProductMinorVersion=$(ProductMinorVersion);ProductPatchVersion=$(ProductPatchVersion);InstallerVersion=$(ProductVersionString);SuiteProductName=$(SuiteProductName);SuiteShortName=$(SuiteShortName);BuildProjectName=$(BuildProjectName);ProductVersionString=$(ProductVersionString);ProductDescription=$(ProductDescription);ProductReleaseQuality=$(ProductReleaseQuality);CompanyName=$(CompanyName);Copyright=$(Copyright);BuildDateTime=$(BuildDateTime)</DefineConstants>
-    <DefineConstants Condition="'$(WixTargetsPath)' !='' AND '$(DefineSolutionProperties)' == 'false'">$(DefineConstants);SolutionDir=$(SolutionDir)</DefineConstants>
-  </PropertyGroup>
+    <!-- If it's a WiX project, define a bunch of properties as constants so that we can get to them from the WiX Project -->
+    <PropertyGroup>
+        <ProductPatchVersion Condition="'$(ProductPatchVersion)' == ''">0</ProductPatchVersion>
+        <DefineConstants Condition="'$(WixTargetsPath)' != ''">$(DefineConstants);ProductMajorVersion=$(ProductMajorVersion);ProductMinorVersion=$(ProductMinorVersion);ProductPatchVersion=$(ProductPatchVersion);InstallerVersion=$(ProductVersionString);SuiteProductName=$(SuiteProductName);SuiteShortName=$(SuiteShortName);BuildProjectName=$(BuildProjectName);ProductVersionString=$(ProductVersionString);ProductDescription=$(ProductDescription);ProductReleaseQuality=$(ProductReleaseQuality);CompanyName=$(CompanyName);Copyright=$(Copyright);BuildDateTime=$(BuildDateTime)</DefineConstants>
+        <DefineConstants Condition="'$(WixTargetsPath)' !='' AND '$(DefineSolutionProperties)' == 'false'">$(DefineConstants);SolutionDir=$(SolutionDir)</DefineConstants>
+    </PropertyGroup>
 
-  <!-- Hard coded to get the location of 7.0A SDK -->
-  <PropertyGroup>
-    <WindowsSdkDir Condition="'$(WindowsSdkDir)' == ''">C:\Program Files (x86)\Windows Kits\8.0\bin\x86\</WindowsSdkDir>
-    <!--WindowsSdkDir Condition="'$(WindowsSdkDir)' == '' OR !Exists($(WindowsSdkDir))">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A@InstallationFolder)bin\</WindowsSdkDir-->
-  </PropertyGroup>
+    <PropertyGroup>
+        <WindowsSdkDir Condition="'$(WindowsSdkDir)' == '' OR !Exists($(WindowsSdkDir))">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0@InstallationFolder)bin\x64\</WindowsSdkDir>
+        <WindowsSdkDir Condition="'$(WindowsSdkDir)' == '' OR !Exists($(WindowsSdkDir))">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.1@InstallationFolder)bin\x64\</WindowsSdkDir>
+        <WindowsSdkDir Condition="'$(WindowsSdkDir)' == '' OR !Exists($(WindowsSdkDir))">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0@InstallationFolder)bin\x64\</WindowsSdkDir>
+        <WindowsSdkDir Condition="'$(WindowsSdkDir)' == '' OR !Exists($(WindowsSdkDir))">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A@InstallationFolder)bin\</WindowsSdkDir>
+    </PropertyGroup>
 
     <!-- For speed, don't copy any assembly or project references. -->
     <!--ItemDefinitionGroup>
